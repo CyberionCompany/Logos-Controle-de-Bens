@@ -894,7 +894,7 @@
         function generateBemDetailHTML(bem, isPdfMode = false, isPublic = false, bemId = '') {
             const dataFormatada = bem.criadoEm.toDate ? bem.criadoEm.toDate().toLocaleDateString('pt-BR') : new Date(bem.criadoEm).toLocaleDateString('pt-BR');
             const placeholderImg = "https://placehold.co/200x150/e2e8f0/adb5bd?text=Foto+do+Bem";
-            const logoPlaceholder = "https://placehold.co/150x50/e2e8f0/adb5bd?text=Sua+Logo";
+            const logoPlaceholder = "../src/utilites/logo.png";
             const fotoSrc = bem.fotoUrl || placeholderImg;
 
             return `
