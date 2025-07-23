@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PatriScan – Gestão de Patrimônio</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         // Configuração do Tailwind CSS para suportar o modo escuro
@@ -14,17 +13,13 @@
         }
     </script>
     
-    <!-- Chart.js para gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- jsPDF e html2canvas para geração de PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- qrcode.js para gerar QR Codes -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
-    <!-- Ícones (Heroicons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -90,9 +85,7 @@
 </head>
 <body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-    <!-- Container da Aplicação Principal -->
     <div id="app-root">
-        <!-- Tela de Login/Cadastro (Inicial) -->
         <div id="auth-screen" class="flex min-h-screen">
             <div class="flex flex-1 flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
                 <div class="mx-auto w-full max-w-sm lg:w-96">
@@ -104,9 +97,8 @@
                         <h2 id="auth-title" class="mt-6 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Acesse sua conta</h2>
                         <p id="auth-subtitle" class="mt-2 text-sm text-gray-600 dark:text-gray-400">Bem-vindo de volta! Por favor, insira seus dados.</p>
                     </div>
-    
+        
                     <div class="mt-8">
-                        <!-- Formulário de Login -->
                         <form id="login-form" class="space-y-6">
                             <div>
                                 <label for="login-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
@@ -114,18 +106,17 @@
                                     <input id="login-email" type="email" required class="block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
                                 </div>
                             </div>
-    
+        
                             <div class="space-y-1">
                                 <label for="login-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
                                 <div class="mt-1">
                                     <input id="login-password" type="password" required class="block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
                                 </div>
                             </div>
-    
+        
                             <button type="submit" class="flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Entrar</button>
                         </form>
-    
-                        <!-- Formulário de Cadastro -->
+        
                         <form id="register-form" class="hidden space-y-6">
                             <div>
                                 <label for="register-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome Completo</label>
@@ -147,7 +138,7 @@
                             </div>
                             <button type="submit" class="flex w-full justify-center rounded-md border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">Criar Conta</button>
                         </form>
-    
+        
                         <div class="relative mt-6">
                             <div class="absolute inset-0 flex items-center" aria-hidden="true">
                                 <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
@@ -163,7 +154,7 @@
                                 <span>Entrar com Google</span>
                             </button>
                         </div>
-    
+        
                         <p id="auth-error" class="text-sm text-center text-red-500 mt-4"></p>
                         <div class="mt-6 text-center">
                             <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -180,9 +171,7 @@
             </div>
         </div>
 
-        <!-- Conteúdo Principal da Aplicação (Pós-login) -->
         <div id="main-content" class="hidden">
-            <!-- Header -->
             <header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex items-center justify-between h-16">
@@ -205,12 +194,9 @@
                 </div>
             </header>
 
-            <!-- Corpo da página -->
             <main class="container mx-auto p-4 sm:p-6 lg:p-8">
-                <!-- Seção do Dashboard -->
                 <div id="dashboard-section" class="fade-in">
                     <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Dashboard</h2>
-                    <!-- Cards de Métricas -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex items-center space-x-4">
                             <div class="bg-green-100 dark:bg-green-900/50 p-3 rounded-full"><i class="fas fa-dollar-sign text-2xl text-green-600 dark:text-green-400"></i></div>
@@ -255,7 +241,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Gráficos -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex flex-col">
                             <h3 class="font-bold mb-4 text-gray-900 dark:text-white">Bens por Setor</h3>
@@ -272,7 +257,6 @@
                     </div>
                 </div>
 
-                <!-- Seção de Cadastro e Listagem de Bens -->
                 <div id="bens-section" class="mt-8 fade-in">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
                         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Gerenciamento de Patrimônio</h2>
@@ -285,14 +269,12 @@
                             </button>
                         </div>
                     </div>
-                    <!-- FEATURE: Filtros -->
                     <div class="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <input type="text" id="search-input" placeholder="Pesquisar por código ou descrição..." class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         <select id="setor-filter" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                             <option value="">Todos os Setores</option>
                         </select>
                     </div>
-                    <!-- Tabela de Bens -->
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-x-auto">
                         <table class="w-full text-left">
                             <thead class="bg-gray-50 dark:bg-gray-700">
@@ -310,7 +292,6 @@
                             </tbody>
                         </table>
                     </div>
-                    <!-- FEATURE: Paginação -->
                     <div id="pagination-controls" class="mt-6 flex items-center justify-between">
                         <button id="prev-page" class="bg-gray-300 dark:bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
                         <span id="page-info" class="text-sm font-medium">Página 1 de 1</span>
@@ -321,14 +302,11 @@
         </div>
     </div>
 
-    <!-- Página de Visualização Pública -->
     <div id="public-view-page" class="hidden min-h-screen flex items-center justify-center p-4">
         <div id="public-bem-card" class="w-full max-w-3xl">
-            <!-- O conteúdo da ficha do bem será inserido aqui -->
-        </div>
+            </div>
     </div>
 
-    <!-- Modal para Adicionar/Editar Bem -->
     <div id="add-bem-modal" class="modal-overlay hidden">
         <div class="modal-content dark:bg-gray-800">
             <div class="flex justify-between items-center mb-6">
@@ -408,14 +386,11 @@
         </div>
     </div>
     
-    <!-- Modal para Visualizar Bem -->
     <div id="view-bem-modal" class="modal-overlay hidden">
         <div id="view-bem-content" class="modal-content relative dark:bg-gray-800">
-            <!-- Conteúdo será injetado aqui para o PDF -->
-        </div>
+            </div>
     </div>
     
-    <!-- Modal de Confirmação -->
     <div id="confirm-modal" class="modal-overlay hidden">
         <div class="modal-content w-full max-w-sm dark:bg-gray-800">
             <h3 id="confirm-modal-title" class="text-lg font-bold mb-4 dark:text-white">Confirmar Ação</h3>
@@ -427,7 +402,6 @@
         </div>
     </div>
 
-    <!-- Modal da Câmera -->
     <div id="camera-modal" class="modal-overlay hidden">
         <div class="modal-content dark:bg-gray-800 w-full max-w-lg">
             <video id="camera-stream" autoplay playsinline class="w-full rounded-md"></video>
@@ -439,17 +413,14 @@
         </div>
     </div>
 
-    <!-- Spinner de Carregamento -->
     <div id="loading-spinner" class="modal-overlay hidden">
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
     </div>
 
-    <!-- Notificação Toast -->
     <div id="toast-notification" class="fixed top-5 right-5 bg-red-600 text-white py-3 px-5 rounded-lg shadow-lg hidden opacity-0 transform -translate-y-10">
         <p id="toast-message"></p>
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
         // Importações do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -476,8 +447,13 @@
             where,
             Timestamp
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
         import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+
+        // --- Configuração do Cloudinary ---
+        // IMPORTANTE: Substitua com seus próprios dados do Cloudinary.
+        // Você precisa criar um "upload preset" para upload não assinado no seu dashboard do Cloudinary.
+        const CLOUDINARY_CLOUD_NAME = "dt7jg4zci"; // Coloque seu Cloud Name aqui
+        const CLOUDINARY_UPLOAD_PRESET = "logostrack"; // Coloque seu Upload Preset aqui
 
         // --- Configuração do Firebase ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' 
@@ -496,7 +472,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
+        // const storage = getStorage(app); // Removido, não é mais necessário
         const analytics = getAnalytics(app);
 
         // --- Referências de Elementos do DOM ---
@@ -696,16 +672,57 @@
             await signOut(auth);
         });
 
+        // --- NOVA Lógica de Upload para Cloudinary ---
+        async function uploadImageToCloudinary(file) {
+            if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME === "SEU_CLOUD_NAME_AQUI") {
+                 throw new Error("Configuração do Cloudinary incompleta: 'CLOUD_NAME' não definido.");
+            }
+            if (!CLOUDINARY_UPLOAD_PRESET || CLOUDINARY_UPLOAD_PRESET === "SEU_UPLOAD_PRESET_AQUI") {
+                 throw new Error("Configuração do Cloudinary incompleta: 'UPLOAD_PRESET' não definido.");
+            }
+
+            const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Erro no upload para o Cloudinary: ${errorData.error.message}`);
+            }
+
+            const data = await response.json();
+            return data.secure_url; // Retorna a URL segura da imagem
+        }
+
         // --- Lógica de Gerenciamento de Bens ---
         const addBemModal = document.getElementById('add-bem-modal');
         const addBemForm = document.getElementById('add-bem-form');
         const addBemError = document.getElementById('add-bem-error');
         const conservacaoSlider = document.getElementById('bem-estado-conservacao');
         const conservacaoValue = document.getElementById('conservacao-value');
+        const fotoInput = document.getElementById('bem-foto');
+        const photoPreview = document.getElementById('photo-preview');
+
+        // Preview da imagem selecionada
+        fotoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                photoPreview.src = URL.createObjectURL(file);
+                photoPreview.classList.remove('hidden');
+            }
+        });
 
         document.getElementById('show-add-bem-modal').addEventListener('click', () => {
             addBemForm.reset();
             addBemError.textContent = '';
+            photoPreview.classList.add('hidden');
+            photoPreview.src = '';
             document.getElementById('modal-title').textContent = 'Adicionar Novo Bem';
             conservacaoValue.textContent = '5';
             addBemModal.classList.remove('hidden');
@@ -723,22 +740,13 @@
             showLoading(true);
             addBemError.textContent = '';
 
-            const vidaUtilValue = document.getElementById('bem-vida-util').value;
-            const estadoConservacaoValue = document.getElementById('bem-estado-conservacao').value;
-            const fotoFile = document.getElementById('bem-foto').files[0];
+            const fotoFile = fotoInput.files[0];
             let fotoUrl = "";
 
             try {
+                // Se um arquivo de foto foi selecionado, faz o upload para o Cloudinary
                 if (fotoFile) {
-                    if (fotoFile.size > 700 * 1024) { // Limite de 700KB
-                        throw new Error("A imagem é muito grande. Por favor, escolha uma com menos de 700KB.");
-                    }
-                    fotoUrl = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
-                        reader.onerror = error => reject(error);
-                        reader.readAsDataURL(fotoFile);
-                    });
+                    fotoUrl = await uploadImageToCloudinary(fotoFile);
                 }
 
                 const bemData = {
@@ -748,12 +756,12 @@
                     valor: Number(document.getElementById('bem-valor').value) || 0,
                     codigoAnterior: document.getElementById('bem-codigo-anterior').value,
                     descricao: document.getElementById('bem-descricao').value,
-                    vidaUtil: Number(vidaUtilValue) || 0,
+                    vidaUtil: Number(document.getElementById('bem-vida-util').value) || 0,
                     periodoUtilizacao: document.getElementById('bem-periodo-utilizacao').value,
-                    estadoConservacao: Number(estadoConservacaoValue) || 0,
+                    estadoConservacao: Number(document.getElementById('bem-estado-conservacao').value) || 0,
                     ocioso: document.getElementById('bem-ocioso').checked,
                     observacoes: document.getElementById('bem-observacoes').value,
-                    fotoUrl: fotoUrl,
+                    fotoUrl: fotoUrl, // Salva a URL do Cloudinary (ou string vazia)
                     criadoPor: currentUser.uid,
                     criadoEm: Timestamp.fromDate(new Date())
                 };
@@ -1002,8 +1010,8 @@
         
         function generateBemDetailHTML(bem, isPdfMode = false, isPublic = false, bemId = '') {
             const dataFormatada = bem.criadoEm.toDate ? bem.criadoEm.toDate().toLocaleDateString('pt-BR') : new Date(bem.criadoEm).toLocaleDateString('pt-BR');
-            const placeholderImg = "https://placehold.co/200x150/e2e8f0/adb5bd?text=Foto+do+Bem";
-            const logoPlaceholder = "../src/utilites/logo.png";
+            const placeholderImg = "https://placehold.co/200x150/e2e8f0/adb5bd?text=Sem+Foto";
+            const logoPlaceholder = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="; // Imagem transparente
             const fotoSrc = bem.fotoUrl || placeholderImg;
             const valorFormatado = (bem.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -1011,7 +1019,9 @@
                 <div id="pdf-content" class="p-8 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
                     <div class="flex justify-between items-start border-b-2 pb-4 mb-4 border-gray-200 dark:border-gray-700">
                         <div>
-                            <img src="${logoPlaceholder}" alt="Logo da Empresa" class="h-12 mb-2">
+                            <div class="flex items-center text-blue-600 dark:text-blue-500 mb-2">
+                               <i class="fas fa-barcode text-3xl"></i><span class="ml-3 text-2xl font-bold text-gray-800 dark:text-white">LogosTrack</span>
+                            </div>
                             <h3 class="text-3xl font-bold text-gray-800 dark:text-white">Ficha Patrimonial</h3>
                         </div>
                         ${!isPdfMode && !isPublic ? '<button id="close-view-modal" class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-3xl">&times;</button>' : ''}
@@ -1039,7 +1049,7 @@
                         </div>
                     </div>
                     <div class="mt-8 flex flex-col items-center justify-center space-y-2 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                        <img src="${fotoSrc}" alt="Foto do bem" class="rounded-lg object-cover w-full max-w-xs h-auto mb-4">
+                        <img src="${fotoSrc}" alt="Foto do bem" class="rounded-lg object-cover w-full max-w-xs h-auto mb-4" crossorigin="anonymous">
                         <div id="qrcode-view" class="flex items-center justify-center bg-white p-1 rounded-md"></div>
                         <p class="text-xs text-center text-gray-600 dark:text-gray-400 mt-2">Escaneie para ver detalhes</p>
                     </div>
@@ -1160,6 +1170,7 @@
         // --- Funções Utilitárias ---
         function showLoading(isLoading) {
             loadingSpinner.classList.toggle('hidden', !isLoading);
+            loadingSpinner.classList.toggle('flex', isLoading);
         }
 
         function resetUI() {
