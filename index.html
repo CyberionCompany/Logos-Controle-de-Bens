@@ -79,9 +79,8 @@
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <!-- Container Principal da Aplicação -->
-    <div id="app-container" class="min-h-screen">
-
+    <!-- Container da Aplicação Principal -->
+    <div id="app-root">
         <!-- Tela de Login/Cadastro (Inicial) -->
         <div id="auth-screen" class="flex items-center justify-center min-h-screen bg-gray-200">
             <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
@@ -238,6 +237,13 @@
         </div>
     </div>
 
+    <!-- Página de Visualização Pública -->
+    <div id="public-view-page" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div id="public-bem-card" class="w-full max-w-3xl">
+            <!-- O conteúdo da ficha do bem será inserido aqui -->
+        </div>
+    </div>
+
     <!-- Modal para Adicionar/Editar Bem -->
     <div id="add-bem-modal" class="modal-overlay hidden">
         <div class="modal-content">
@@ -359,6 +365,7 @@
             addDoc, 
             getDocs, 
             doc, 
+            getDoc,
             deleteDoc,
             onSnapshot,
             query,
@@ -366,7 +373,6 @@
             Timestamp
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
-        // FEATURE: Importar o Firebase Analytics
         import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
         // --- Configuração do Firebase ---
@@ -387,9 +393,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
-        const analytics = getAnalytics(app); // FEATURE: Inicializar o Analytics
+        const analytics = getAnalytics(app);
 
         // --- Referências de Elementos do DOM ---
+        const appRoot = document.getElementById('app-root');
+        const publicViewPage = document.getElementById('public-view-page');
         const authScreen = document.getElementById('auth-screen');
         const mainContent = document.getElementById('main-content');
         const loadingSpinner = document.getElementById('loading-spinner');
@@ -398,6 +406,63 @@
         let bensUnsubscribe = null;
         let bensPorSetorChartInstance = null;
         let bensPorConservacaoChartInstance = null;
+
+        // --- Lógica de Roteamento (Página Pública vs App Principal) ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('view') === 'public' && params.get('userId') && params.get('bemId')) {
+                handlePublicView(params.get('userId'), params.get('bemId'));
+            } else {
+                setupMainApp();
+            }
+        });
+
+        async function handlePublicView(userId, bemId) {
+            appRoot.classList.add('hidden');
+            publicViewPage.classList.remove('hidden');
+            const publicBemCard = document.getElementById('public-bem-card');
+            publicBemCard.innerHTML = `<div class="text-center"><p class="text-xl">A carregar dados do bem...</p></div>`;
+
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/patrimonios`, bemId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const bemData = docSnap.data();
+                    publicBemCard.innerHTML = generateBemDetailHTML(bemData, false, true); // isPublic = true
+                    new QRCode(document.getElementById("qrcode-view"), {
+                        text: window.location.href, // URL da própria página pública
+                        width: 128,
+                        height: 128,
+                    });
+                } else {
+                    publicBemCard.innerHTML = `<div class="text-center bg-white p-8 rounded-lg shadow-lg"><p class="text-xl text-red-600 font-bold">Erro</p><p>Ficha patrimonial não encontrada.</p></div>`;
+                }
+            } catch (error) {
+                console.error("Erro ao carregar bem público:", error);
+                publicBemCard.innerHTML = `<div class="text-center bg-white p-8 rounded-lg shadow-lg"><p class="text-xl text-red-600 font-bold">Erro</p><p>Não foi possível carregar os dados. Tente novamente mais tarde.</p></div>`;
+            }
+        }
+
+        function setupMainApp() {
+            publicViewPage.classList.add('hidden');
+            appRoot.classList.remove('hidden');
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    authScreen.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                    document.getElementById('user-email-display').textContent = user.displayName || user.email;
+                    loadBens();
+                } else {
+                    currentUser = null;
+                    if (bensUnsubscribe) bensUnsubscribe();
+                    authScreen.classList.remove('hidden');
+                    mainContent.classList.add('hidden');
+                    resetUI();
+                }
+            });
+        }
 
         // --- Lógica de Autenticação ---
         const loginForm = document.getElementById('login-form');
@@ -428,7 +493,7 @@
             try {
                 await signInWithEmailAndPassword(auth, email, password);
                 authError.textContent = '';
-                logEvent(analytics, 'login', { method: 'Email' }); // FEATURE: Evento de login
+                logEvent(analytics, 'login', { method: 'Email' });
             } catch (error) {
                 console.error("Erro no login:", error);
                 authError.textContent = 'Email ou senha inválidos.';
@@ -447,7 +512,7 @@
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 await updateProfile(userCredential.user, { displayName: name });
                 authError.textContent = '';
-                logEvent(analytics, 'sign_up', { method: 'Email' }); // FEATURE: Evento de cadastro
+                logEvent(analytics, 'sign_up', { method: 'Email' });
             } catch (error) {
                 console.error("Erro no registro:", error);
                 if (error.code === 'auth/email-already-in-use') {
@@ -462,22 +527,6 @@
 
         document.getElementById('logout-button').addEventListener('click', async () => {
             await signOut(auth);
-        });
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                authScreen.classList.add('hidden');
-                mainContent.classList.remove('hidden');
-                document.getElementById('user-email-display').textContent = user.displayName || user.email;
-                loadBens();
-            } else {
-                currentUser = null;
-                if (bensUnsubscribe) bensUnsubscribe();
-                authScreen.classList.remove('hidden');
-                mainContent.classList.add('hidden');
-                resetUI();
-            }
         });
 
         // --- Lógica de Gerenciamento de Bens ---
@@ -538,7 +587,7 @@
                 const collectionPath = `artifacts/${appId}/users/${currentUser.uid}/patrimonios`;
                 await addDoc(collection(db, collectionPath), bemData);
                 
-                logEvent(analytics, 'add_bem', { setor: bemData.setor }); // FEATURE: Evento de adicionar bem
+                logEvent(analytics, 'add_bem', { setor: bemData.setor });
                 
                 addBemModal.classList.add('hidden');
                 addBemForm.reset();
@@ -684,11 +733,12 @@
             const bem = bens.find(b => b.id === id);
             if (!bem) return;
             
-            viewBemContent.innerHTML = generateBemDetailHTML(bem);
+            viewBemContent.innerHTML = generateBemDetailHTML(bem, false, false, id);
             viewBemModal.classList.remove('hidden');
             
+            const publicUrl = `${window.location.origin}${window.location.pathname}?view=public&userId=${currentUser.uid}&bemId=${id}`;
             new QRCode(document.getElementById("qrcode-view"), {
-                text: `${window.location.href}?bem=${bem.id}`,
+                text: publicUrl,
                 width: 128,
                 height: 128,
             });
@@ -708,11 +758,12 @@
             pdfContainer.style.position = 'absolute';
             pdfContainer.style.left = '-9999px';
             pdfContainer.style.width = '800px';
-            pdfContainer.innerHTML = generateBemDetailHTML(bem, true);
+            pdfContainer.innerHTML = generateBemDetailHTML(bem, true, false, id);
             document.body.appendChild(pdfContainer);
 
+            const publicUrl = `${window.location.origin}${window.location.pathname}?view=public&userId=${currentUser.uid}&bemId=${id}`;
             new QRCode(pdfContainer.querySelector("#qrcode-view"), {
-                text: `${window.location.href}?bem=${bem.id}`,
+                text: publicUrl,
                 width: 128,
                 height: 128,
             });
@@ -738,19 +789,19 @@
             }
         }
         
-        function generateBemDetailHTML(bem, isPdfMode = false) {
+        function generateBemDetailHTML(bem, isPdfMode = false, isPublic = false, bemId = '') {
             const dataFormatada = bem.criadoEm.toDate ? bem.criadoEm.toDate().toLocaleDateString('pt-BR') : new Date(bem.criadoEm).toLocaleDateString('pt-BR');
             const placeholderImg = "https://placehold.co/200x150/e2e8f0/adb5bd?text=Foto+do+Bem";
             const fotoSrc = bem.fotoUrl || placeholderImg;
 
             return `
-                <div id="pdf-content" class="p-8 bg-white rounded-lg">
+                <div id="pdf-content" class="p-8 bg-white rounded-lg shadow-lg">
                     <div class="flex justify-between items-start border-b-2 pb-4 mb-4 border-gray-200">
                         <div>
                             <h3 class="text-3xl font-bold text-gray-800">Ficha Patrimonial</h3>
                             <p class="text-gray-500">PatriScan System</p>
                         </div>
-                        ${!isPdfMode ? '<button id="close-view-modal" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>' : ''}
+                        ${!isPdfMode && !isPublic ? '<button id="close-view-modal" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>' : ''}
                     </div>
                     <div class="grid grid-cols-12 gap-6">
                         <div class="col-span-12 md:col-span-8 space-y-4">
@@ -804,7 +855,7 @@
                 return;
             }
 
-            logEvent(analytics, 'export_csv'); // FEATURE: Evento de exportar CSV
+            logEvent(analytics, 'export_csv');
 
             const headers = Object.keys(bens[0]).join(',');
             const rows = bens.map(bem => {
