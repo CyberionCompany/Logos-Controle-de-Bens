@@ -846,11 +846,17 @@
             if (!bem) return;
             
             showLoading(true);
+
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            if (isDarkMode) {
+                document.documentElement.classList.remove('dark');
+            }
             
             const pdfContainer = document.createElement('div');
             pdfContainer.style.position = 'absolute';
             pdfContainer.style.left = '-9999px';
             pdfContainer.style.width = '800px';
+            
             pdfContainer.innerHTML = generateBemDetailHTML(bem, true, false, id);
             document.body.appendChild(pdfContainer);
 
@@ -861,7 +867,7 @@
                 height: 128,
             });
             
-            await new Promise(resolve => setTimeout(resolve, 400));
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             try {
                 const canvas = await html2canvas(pdfContainer, { scale: 2 });
@@ -878,6 +884,9 @@
                 showToast("Não foi possível gerar o PDF.");
             } finally {
                 document.body.removeChild(pdfContainer);
+                if (isDarkMode) {
+                    document.documentElement.classList.add('dark');
+                }
                 showLoading(false);
             }
         }
@@ -898,7 +907,7 @@
                         ${!isPdfMode && !isPublic ? '<button id="close-view-modal" class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-3xl">&times;</button>' : ''}
                     </div>
                     <div class="grid grid-cols-12 gap-6">
-                        <div class="col-span-12 md:col-span-8 space-y-4 text-gray-800 dark:text-gray-300">
+                        <div class="col-span-12 space-y-4 text-gray-800 dark:text-gray-300">
                             <div class="grid grid-cols-2 gap-4">
                                 <div><p class="text-sm text-gray-500 dark:text-gray-400">Código do Bem</p><p class="font-semibold text-lg">${bem.codigoBem}</p></div>
                                 <div><p class="text-sm text-gray-500 dark:text-gray-400">Código Anterior</p><p class="font-semibold">${bem.codigoAnterior || 'N/A'}</p></div>
@@ -918,11 +927,11 @@
                             </div>
                             <div><p class="text-sm text-gray-500 dark:text-gray-400">Observações</p><p class="font-semibold">${bem.observacoes || 'Nenhuma'}</p></div>
                         </div>
-                        <div class="col-span-12 md:col-span-4 flex flex-col items-center justify-center space-y-2 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                            <div id="qrcode-view" class="flex items-center justify-center bg-white p-1 rounded-md"></div>
-                            <p class="text-xs text-center text-gray-600 dark:text-gray-400">Escaneie para ver detalhes</p>
-                            <img src="${fotoSrc}" alt="Foto do bem" class="mt-4 rounded-lg object-cover w-full h-auto">
-                        </div>
+                    </div>
+                    <div class="mt-8 flex flex-col items-center justify-center space-y-2 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                        <img src="${fotoSrc}" alt="Foto do bem" class="rounded-lg object-cover w-full max-w-xs h-auto mb-4">
+                        <div id="qrcode-view" class="flex items-center justify-center bg-white p-1 rounded-md"></div>
+                        <p class="text-xs text-center text-gray-600 dark:text-gray-400 mt-2">Escaneie para ver detalhes</p>
                     </div>
                     <div class="border-t-2 pt-4 mt-6 text-sm text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700">
                         <p>Ficha gerada em ${new Date().toLocaleString('pt-BR')}. Cadastrado em ${dataFormatada}.</p>
