@@ -211,7 +211,21 @@
                 <div id="dashboard-section" class="fade-in">
                     <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Dashboard</h2>
                     <!-- Cards de Métricas -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex items-center space-x-4">
+                            <div class="bg-green-100 dark:bg-green-900/50 p-3 rounded-full"><i class="fas fa-dollar-sign text-2xl text-green-600 dark:text-green-400"></i></div>
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Valor Total</p>
+                                <p id="valor-total" class="text-2xl font-bold text-gray-900 dark:text-white">R$ 0,00</p>
+                            </div>
+                        </div>
+                         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex items-center space-x-4">
+                            <div class="bg-red-100 dark:bg-red-900/50 p-3 rounded-full"><i class="fas fa-exclamation-triangle text-2xl text-red-600 dark:text-red-400"></i></div>
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Valor em Risco</p>
+                                <p id="valor-risco" class="text-2xl font-bold text-gray-900 dark:text-white">R$ 0,00</p>
+                            </div>
+                        </div>
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex items-center space-x-4">
                             <div class="bg-blue-100 dark:bg-blue-900/50 p-3 rounded-full"><i class="fas fa-archive text-2xl text-blue-600 dark:text-blue-400"></i></div>
                             <div>
@@ -344,6 +358,10 @@
                     </div>
                 </div>
                 <div>
+                    <label for="bem-valor" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Valor do Bem (R$)</label>
+                    <input type="number" id="bem-valor" step="0.01" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
                     <label for="bem-descricao" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descrição do Bem</label>
                     <textarea id="bem-descricao" rows="3" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
@@ -377,10 +395,7 @@
                 <div>
                     <label for="bem-foto" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Foto do Bem</label>
                     <div class="mt-1 flex items-center space-x-2">
-                        <input type="file" id="bem-foto" accept="image/*" class="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-gray-600 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-gray-500">
-                        <button type="button" id="take-photo-button" class="p-2.5 bg-gray-200 dark:bg-gray-600 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 hidden">
-                            <i class="fas fa-camera"></i>
-                        </button>
+                        <input type="file" id="bem-foto" accept="image/*" capture="environment" class="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-gray-600 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-gray-500">
                     </div>
                     <img id="photo-preview" class="hidden mt-2 rounded-md h-24 w-auto"/>
                 </div>
@@ -730,6 +745,7 @@
                     orgao: document.getElementById('bem-orgao').value,
                     setor: document.getElementById('bem-setor').value,
                     codigoBem: document.getElementById('bem-codigo').value,
+                    valor: Number(document.getElementById('bem-valor').value) || 0,
                     codigoAnterior: document.getElementById('bem-codigo-anterior').value,
                     descricao: document.getElementById('bem-descricao').value,
                     vidaUtil: Number(vidaUtilValue) || 0,
@@ -745,7 +761,7 @@
                 const collectionPath = `artifacts/${appId}/users/${currentUser.uid}/patrimonios`;
                 await addDoc(collection(db, collectionPath), bemData);
                 
-                logEvent(analytics, 'add_bem', { setor: bemData.setor });
+                logEvent(analytics, 'add_bem', { setor: bemData.setor, valor: bemData.valor });
                 
                 addBemModal.classList.add('hidden');
                 addBemForm.reset();
@@ -827,13 +843,19 @@
         // --- Lógica do Dashboard ---
         function updateDashboard(bens) {
             const totalBens = bens.length;
-            const bensOciosos = bens.filter(b => b.ocioso).length;
+            const valorTotal = bens.reduce((acc, bem) => acc + (bem.valor || 0), 0);
+            const bensOciosos = bens.filter(b => b.ocioso);
+            const valorRisco = bensOciosos.reduce((acc, bem) => acc + (bem.valor || 0), 0);
             const setores = [...new Set(bens.map(b => b.setor))];
             const conservacaoTotal = bens.reduce((acc, b) => acc + (b.estadoConservacao || 0), 0);
             const conservacaoMedia = totalBens > 0 ? (conservacaoTotal / totalBens).toFixed(1) : 0;
 
+            const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
             document.getElementById('total-bens').textContent = totalBens;
-            document.getElementById('bens-ociosos').textContent = bensOciosos;
+            document.getElementById('valor-total').textContent = formatCurrency(valorTotal);
+            document.getElementById('valor-risco').textContent = formatCurrency(valorRisco);
+            document.getElementById('bens-ociosos').textContent = bensOciosos.length;
             document.getElementById('conservacao-media').textContent = `${conservacaoMedia}/10`;
             document.getElementById('total-setores').textContent = setores.length;
             
@@ -981,8 +1003,9 @@
         function generateBemDetailHTML(bem, isPdfMode = false, isPublic = false, bemId = '') {
             const dataFormatada = bem.criadoEm.toDate ? bem.criadoEm.toDate().toLocaleDateString('pt-BR') : new Date(bem.criadoEm).toLocaleDateString('pt-BR');
             const placeholderImg = "https://placehold.co/200x150/e2e8f0/adb5bd?text=Foto+do+Bem";
-            const logoPlaceholder = "https://placehold.co/150x50/e2e8f0/adb5bd?text=Sua+Logo";
+            const logoPlaceholder = "../src/utilites/logo.png";
             const fotoSrc = bem.fotoUrl || placeholderImg;
+            const valorFormatado = (bem.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             return `
                 <div id="pdf-content" class="p-8 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
@@ -997,7 +1020,7 @@
                         <div class="col-span-12 space-y-4 text-gray-800 dark:text-gray-300">
                             <div class="grid grid-cols-2 gap-4">
                                 <div><p class="text-sm text-gray-500 dark:text-gray-400">Código do Bem</p><p class="font-semibold text-lg">${bem.codigoBem}</p></div>
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Código Anterior</p><p class="font-semibold">${bem.codigoAnterior || 'N/A'}</p></div>
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Valor do Bem</p><p class="font-semibold text-lg">${valorFormatado}</p></div>
                             </div>
                             <div><p class="text-sm text-gray-500 dark:text-gray-400">Descrição</p><p class="font-semibold">${bem.descricao}</p></div>
                             <div class="grid grid-cols-2 gap-4">
@@ -1191,4 +1214,4 @@
 
     </script>
 </body>
-</ht
+</html>
