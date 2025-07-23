@@ -148,6 +148,22 @@
                             <button type="submit" class="flex w-full justify-center rounded-md border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">Criar Conta</button>
                         </form>
     
+                        <div class="relative mt-6">
+                            <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                                <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                            </div>
+                            <div class="relative flex justify-center text-sm">
+                                <span class="bg-white dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">OU</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <button id="google-signin-button" type="button" class="flex w-full items-center justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                <svg class="h-5 w-5 mr-3" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M47.532 24.555C47.532 22.92 47.387 21.285 47.097 19.725H24.21V28.71H37.305C36.687 31.845 34.608 34.47 31.638 36.39V42.345H39.885C44.602 37.98 47.532 31.845 47.532 24.555Z" fill="#4285F4"></path><path d="M24.21 48C30.69 48 36.12 45.81 39.885 42.345L31.638 36.39C29.34 37.98 26.91 38.88 24.21 38.88C18.99 38.88 14.49 35.37 12.87 30.495L4.41 30.495V36.66C8.175 43.56 15.615 48 24.21 48Z" fill="#34A853"></path><path d="M12.87 30.495C12.33 28.98 12.042 27.345 12.042 25.65C12.042 23.955 12.33 22.32 12.87 20.805V14.64L4.41 14.64C1.59 20.16 0 26.64 0 33.345C0 40.05 1.59 46.53 4.41 52.05L12.87 45.885C12.33 44.37 12.042 42.735 12.042 41.04C12.042 39.345 12.33 37.71 12.87 36.195" fill="#FBBC05"></path><path d="M24.21 9.42C27.45 9.42 30.33 10.53 32.52 12.63L40.155 5.01C36.12 1.59 30.69 0 24.21 0C15.615 0 8.175 4.44 4.41 11.34L12.87 17.505C14.49 12.63 18.99 9.42 24.21 9.42Z" fill="#EA4335"></path></svg>
+                                <span>Entrar com Google</span>
+                            </button>
+                        </div>
+    
                         <p id="auth-error" class="text-sm text-center text-red-500 mt-4"></p>
                         <div class="mt-6 text-center">
                             <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -360,7 +376,7 @@
                 </div>
                 <div>
                     <label for="bem-foto" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Foto do Bem</label>
-                    <input type="file" id="bem-foto" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-gray-600 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-gray-500">
+                    <input type="file" id="bem-foto" accept="image/*" capture="environment" class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-gray-600 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-gray-500">
                 </div>
                 <p id="add-bem-error" class="text-sm text-center text-red-500 h-4"></p>
                 <div class="flex justify-end space-x-3 pt-2">
@@ -410,7 +426,9 @@
             signInWithEmailAndPassword, 
             signOut, 
             onAuthStateChanged,
-            updateProfile
+            updateProfile,
+            GoogleAuthProvider,
+            signInWithPopup
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
             getFirestore, 
@@ -567,6 +585,8 @@
         const toggleAuthModeLink = document.getElementById('toggle-auth-mode');
         const authTitle = document.getElementById('auth-title');
         const authError = document.getElementById('auth-error');
+        const googleSignInBtn = document.getElementById('google-signin-button');
+        const googleProvider = new GoogleAuthProvider();
 
         toggleAuthModeLink.addEventListener('click', (e) => {
             e.preventDefault();
@@ -624,6 +644,20 @@
             }
         });
 
+        googleSignInBtn.addEventListener('click', async () => {
+            showLoading(true);
+            try {
+                await signInWithPopup(auth, googleProvider);
+                authError.textContent = '';
+                logEvent(analytics, 'login', { method: 'Google' });
+            } catch (error) {
+                console.error("Erro no login com Google:", error);
+                authError.textContent = 'Falha ao autenticar com o Google.';
+            } finally {
+                showLoading(false);
+            }
+        });
+
         document.getElementById('logout-button').addEventListener('click', async () => {
             await signOut(auth);
         });
@@ -662,9 +696,15 @@
 
             try {
                 if (fotoFile) {
-                    const storageRef = ref(storage, `patrimonios/${currentUser.uid}/${Date.now()}-${fotoFile.name}`);
-                    const uploadResult = await uploadBytes(storageRef, fotoFile);
-                    fotoUrl = await getDownloadURL(uploadResult.ref);
+                    if (fotoFile.size > 700 * 1024) { // Limite de 700KB
+                        throw new Error("A imagem é muito grande. Por favor, escolha uma com menos de 700KB.");
+                    }
+                    fotoUrl = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = error => reject(error);
+                        reader.readAsDataURL(fotoFile);
+                    });
                 }
 
                 const bemData = {
@@ -692,7 +732,7 @@
                 addBemForm.reset();
             } catch (error) {
                 console.error("Erro ao adicionar bem: ", error);
-                addBemError.textContent = "Falha ao salvar. Verifique os dados e a conexão.";
+                addBemError.textContent = error.message || "Falha ao salvar. Verifique os dados e a conexão.";
             } finally {
                 showLoading(false);
             }
@@ -922,7 +962,7 @@
         function generateBemDetailHTML(bem, isPdfMode = false, isPublic = false, bemId = '') {
             const dataFormatada = bem.criadoEm.toDate ? bem.criadoEm.toDate().toLocaleDateString('pt-BR') : new Date(bem.criadoEm).toLocaleDateString('pt-BR');
             const placeholderImg = "https://placehold.co/200x150/e2e8f0/adb5bd?text=Foto+do+Bem";
-            const logoPlaceholder = "https://placehold.co/150x50/e2e8f0/adb5bd?text=Sua+Logo";
+            const logoPlaceholder = "../src/utilites/logo.png";
             const fotoSrc = bem.fotoUrl || placeholderImg;
 
             return `
