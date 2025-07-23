@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +7,12 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configuração do Tailwind CSS para suportar o modo escuro
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     
     <!-- Chart.js para gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -50,12 +56,17 @@
         }
         .modal-content {
             background: white;
-            padding: 2rem;
+            padding: 1.5rem; /* Padding reduzido para mobile */
             border-radius: 0.75rem;
             max-width: 90%;
             width: 600px;
             max-height: 90vh;
             overflow-y: auto;
+        }
+        @media (min-width: 640px) {
+            .modal-content {
+                padding: 2rem;
+            }
         }
         #toast-notification {
             transition: opacity 0.5s, transform 0.5s;
@@ -77,28 +88,28 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
     <!-- Container da Aplicação Principal -->
     <div id="app-root">
         <!-- Tela de Login/Cadastro (Inicial) -->
-        <div id="auth-screen" class="flex items-center justify-center min-h-screen bg-gray-200">
-            <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+        <div id="auth-screen" class="flex items-center justify-center min-h-screen bg-gray-200 dark:bg-gray-800">
+            <div class="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-900 rounded-xl shadow-lg">
                 <div class="text-center">
                     <i class="fas fa-barcode text-4xl text-blue-600"></i>
-                    <h1 class="mt-4 text-3xl font-bold text-gray-900">PatriScan</h1>
-                    <p id="auth-title" class="text-gray-600">Acesse sua conta para continuar</p>
+                    <h1 class="mt-4 text-3xl font-bold text-gray-900 dark:text-white">PatriScan</h1>
+                    <p id="auth-title" class="text-gray-600 dark:text-gray-400">Acesse sua conta para continuar</p>
                 </div>
 
                 <!-- Formulário de Login -->
                 <form id="login-form" class="space-y-4">
                     <div>
-                        <label for="login-email" class="text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="login-email" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="seu@email.com">
+                        <label for="login-email" class="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                        <input type="email" id="login-email" required class="w-full px-4 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="seu@email.com">
                     </div>
                     <div>
-                        <label for="login-password" class="text-sm font-medium text-gray-700">Senha</label>
-                        <input type="password" id="login-password" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="********">
+                        <label for="login-password" class="text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
+                        <input type="password" id="login-password" required class="w-full px-4 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="********">
                     </div>
                     <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">Entrar</button>
                 </form>
@@ -106,23 +117,23 @@
                 <!-- Formulário de Cadastro -->
                 <form id="register-form" class="hidden space-y-4">
                      <div>
-                        <label for="register-name" class="text-sm font-medium text-gray-700">Nome Completo</label>
-                        <input type="text" id="register-name" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Seu Nome">
+                        <label for="register-name" class="text-sm font-medium text-gray-700 dark:text-gray-300">Nome Completo</label>
+                        <input type="text" id="register-name" required class="w-full px-4 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Seu Nome">
                     </div>
                     <div>
-                        <label for="register-email" class="text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="register-email" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="seu@email.com">
+                        <label for="register-email" class="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                        <input type="email" id="register-email" required class="w-full px-4 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="seu@email.com">
                     </div>
                     <div>
-                        <label for="register-password" class="text-sm font-medium text-gray-700">Senha</label>
-                        <input type="password" id="register-password" required minlength="6" class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Mínimo 6 caracteres">
+                        <label for="register-password" class="text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
+                        <input type="password" id="register-password" required minlength="6" class="w-full px-4 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Mínimo 6 caracteres">
                     </div>
                     <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">Criar Conta</button>
                 </form>
 
                 <p id="auth-error" class="text-sm text-center text-red-500"></p>
                 <div class="text-center">
-                    <a href="#" id="toggle-auth-mode" class="text-sm text-blue-600 hover:underline">Não tem uma conta? Cadastre-se</a>
+                    <a href="#" id="toggle-auth-mode" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">Não tem uma conta? Cadastre-se</a>
                 </div>
             </div>
         </div>
@@ -130,15 +141,19 @@
         <!-- Conteúdo Principal da Aplicação (Pós-login) -->
         <div id="main-content" class="hidden">
             <!-- Header -->
-            <header class="bg-white shadow-md sticky top-0 z-50">
+            <header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex items-center justify-between h-16">
                         <div class="flex items-center">
                             <i class="fas fa-barcode text-2xl text-blue-600"></i>
-                            <span class="ml-3 text-xl font-bold text-gray-800">PatriScan</span>
+                            <span class="ml-3 text-xl font-bold text-gray-800 dark:text-white">PatriScan</span>
                         </div>
                         <div class="flex items-center space-x-4">
-                            <span id="user-email-display" class="text-sm text-gray-600 hidden md:block"></span>
+                            <span id="user-email-display" class="text-sm text-gray-600 dark:text-gray-400 hidden md:block"></span>
+                            <button id="theme-toggle" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5">
+                                <i id="theme-toggle-dark-icon" class="fas fa-moon hidden"></i>
+                                <i id="theme-toggle-light-icon" class="fas fa-sun hidden"></i>
+                            </button>
                             <button id="logout-button" class="flex items-center px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
                                 <i class="fas fa-sign-out-alt mr-2"></i>
                                 Sair
@@ -152,48 +167,48 @@
             <main class="container mx-auto p-4 sm:p-6 lg:p-8">
                 <!-- Seção do Dashboard -->
                 <div id="dashboard-section" class="fade-in">
-                    <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+                    <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Dashboard</h2>
                     <!-- Cards de Métricas -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4">
-                            <div class="bg-blue-100 p-3 rounded-full"><i class="fas fa-archive text-2xl text-blue-600"></i></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex items-center space-x-4">
+                            <div class="bg-blue-100 dark:bg-blue-900/50 p-3 rounded-full"><i class="fas fa-archive text-2xl text-blue-600 dark:text-blue-400"></i></div>
                             <div>
-                                <p class="text-gray-500 text-sm">Total de Bens</p>
-                                <p id="total-bens" class="text-2xl font-bold">0</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Total de Bens</p>
+                                <p id="total-bens" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4">
-                            <div class="bg-yellow-100 p-3 rounded-full"><i class="fas fa-box-open text-2xl text-yellow-600"></i></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex items-center space-x-4">
+                            <div class="bg-yellow-100 dark:bg-yellow-900/50 p-3 rounded-full"><i class="fas fa-box-open text-2xl text-yellow-600 dark:text-yellow-400"></i></div>
                             <div>
-                                <p class="text-gray-500 text-sm">Bens Ociosos</p>
-                                <p id="bens-ociosos" class="text-2xl font-bold">0</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Bens Ociosos</p>
+                                <p id="bens-ociosos" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4">
-                            <div class="bg-green-100 p-3 rounded-full"><i class="fas fa-star-half-alt text-2xl text-green-600"></i></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex items-center space-x-4">
+                            <div class="bg-green-100 dark:bg-green-900/50 p-3 rounded-full"><i class="fas fa-star-half-alt text-2xl text-green-600 dark:text-green-400"></i></div>
                             <div>
-                                <p class="text-gray-500 text-sm">Conservação Média</p>
-                                <p id="conservacao-media" class="text-2xl font-bold">0/10</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Conservação Média</p>
+                                <p id="conservacao-media" class="text-2xl font-bold text-gray-900 dark:text-white">0/10</p>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4">
-                            <div class="bg-purple-100 p-3 rounded-full"><i class="fas fa-building text-2xl text-purple-600"></i></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex items-center space-x-4">
+                            <div class="bg-purple-100 dark:bg-purple-900/50 p-3 rounded-full"><i class="fas fa-building text-2xl text-purple-600 dark:text-purple-400"></i></div>
                             <div>
-                                <p class="text-gray-500 text-sm">Total de Setores</p>
-                                <p id="total-setores" class="text-2xl font-bold">0</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Total de Setores</p>
+                                <p id="total-setores" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
                             </div>
                         </div>
                     </div>
                     <!-- Gráficos -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-xl shadow-md flex flex-col">
-                            <h3 class="font-bold mb-4">Bens por Setor</h3>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex flex-col">
+                            <h3 class="font-bold mb-4 text-gray-900 dark:text-white">Bens por Setor</h3>
                             <div class="relative h-72 md:h-80">
                                 <canvas id="bensPorSetorChart"></canvas>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-md flex flex-col">
-                            <h3 class="font-bold mb-4">Bens por Estado de Conservação</h3>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex flex-col">
+                            <h3 class="font-bold mb-4 text-gray-900 dark:text-white">Bens por Estado de Conservação</h3>
                             <div class="relative h-72 md:h-80">
                                 <canvas id="bensPorConservacaoChart"></canvas>
                             </div>
@@ -204,7 +219,7 @@
                 <!-- Seção de Cadastro e Listagem de Bens -->
                 <div id="bens-section" class="mt-8 fade-in">
                     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                        <h2 class="text-2xl font-bold">Gerenciamento de Patrimônio</h2>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Gerenciamento de Patrimônio</h2>
                         <div class="flex items-center space-x-2">
                             <button id="export-csv-button" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center">
                                 <i class="fas fa-file-csv mr-2"></i> Exportar CSV
@@ -215,20 +230,20 @@
                         </div>
                     </div>
                     <!-- Tabela de Bens -->
-                    <div class="bg-white rounded-xl shadow-md overflow-x-auto">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-x-auto">
                         <table class="w-full text-left">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <th class="p-4 font-semibold">Código</th>
-                                    <th class="p-4 font-semibold">Descrição</th>
-                                    <th class="p-4 font-semibold">Setor</th>
-                                    <th class="p-4 font-semibold">Conservação</th>
-                                    <th class="p-4 font-semibold">Status</th>
-                                    <th class="p-4 font-semibold text-center">Ações</th>
+                                    <th class="p-4 font-semibold text-gray-600 dark:text-gray-300">Código</th>
+                                    <th class="p-4 font-semibold text-gray-600 dark:text-gray-300">Descrição</th>
+                                    <th class="p-4 font-semibold text-gray-600 dark:text-gray-300">Setor</th>
+                                    <th class="p-4 font-semibold text-gray-600 dark:text-gray-300">Conservação</th>
+                                    <th class="p-4 font-semibold text-gray-600 dark:text-gray-300">Status</th>
+                                    <th class="p-4 font-semibold text-gray-600 dark:text-gray-300 text-center">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody id="bens-table-body">
-                                <tr><td colspan="6" class="p-4 text-center text-gray-500">Nenhum bem cadastrado.</td></tr>
+                            <tbody id="bens-table-body" class="divide-y divide-gray-200 dark:divide-gray-700">
+                                <tr><td colspan="6" class="p-4 text-center text-gray-500 dark:text-gray-400">Nenhum bem cadastrado.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -246,50 +261,50 @@
 
     <!-- Modal para Adicionar/Editar Bem -->
     <div id="add-bem-modal" class="modal-overlay hidden">
-        <div class="modal-content">
+        <div class="modal-content dark:bg-gray-800">
             <div class="flex justify-between items-center mb-6">
-                <h3 id="modal-title" class="text-2xl font-bold">Adicionar Novo Bem</h3>
-                <button id="close-add-bem-modal" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+                <h3 id="modal-title" class="text-2xl font-bold dark:text-white">Adicionar Novo Bem</h3>
+                <button id="close-add-bem-modal" class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-2xl">&times;</button>
             </div>
             <form id="add-bem-form" class="space-y-4">
                 <input type="hidden" id="bem-id">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="bem-orgao" class="block text-sm font-medium text-gray-700">Órgão</label>
-                        <input type="text" id="bem-orgao" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="bem-orgao" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Órgão</label>
+                        <input type="text" id="bem-orgao" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label for="bem-setor" class="block text-sm font-medium text-gray-700">Setor</label>
-                        <input type="text" id="bem-setor" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="bem-setor" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Setor</label>
+                        <input type="text" id="bem-setor" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="bem-codigo" class="block text-sm font-medium text-gray-700">Código do Bem (Plaqueta)</label>
-                        <input type="text" id="bem-codigo" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="bem-codigo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Código do Bem (Plaqueta)</label>
+                        <input type="text" id="bem-codigo" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label for="bem-codigo-anterior" class="block text-sm font-medium text-gray-700">Código Anterior (Opcional)</label>
-                        <input type="text" id="bem-codigo-anterior" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="bem-codigo-anterior" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Código Anterior (Opcional)</label>
+                        <input type="text" id="bem-codigo-anterior" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
                 <div>
-                    <label for="bem-descricao" class="block text-sm font-medium text-gray-700">Descrição do Bem</label>
-                    <textarea id="bem-descricao" rows="3" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    <label for="bem-descricao" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descrição do Bem</label>
+                    <textarea id="bem-descricao" rows="3" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="bem-vida-util" class="block text-sm font-medium text-gray-700">Vida Útil (anos)</label>
-                        <input type="number" id="bem-vida-util" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="bem-vida-util" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Vida Útil (anos)</label>
+                        <input type="number" id="bem-vida-util" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label for="bem-periodo-utilizacao" class="block text-sm font-medium text-gray-700">Período de Utilização</label>
-                        <input type="text" id="bem-periodo-utilizacao" placeholder="Ex: 2 anos, 6 meses" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="bem-periodo-utilizacao" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Período de Utilização</label>
+                        <input type="text" id="bem-periodo-utilizacao" placeholder="Ex: 2 anos, 6 meses" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
                 <div>
-                    <label for="bem-estado-conservacao" class="block text-sm font-medium text-gray-700">Estado de Conservação (1 a 10)</label>
-                    <input type="range" id="bem-estado-conservacao" min="1" max="10" value="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <label for="bem-estado-conservacao" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado de Conservação (1 a 10)</label>
+                    <input type="range" id="bem-estado-conservacao" min="1" max="10" value="5" class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer">
                     <span id="conservacao-value" class="text-center block text-sm font-bold">5</span>
                 </div>
                 <div class="flex items-start">
@@ -297,21 +312,20 @@
                         <input id="bem-ocioso" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
                     </div>
                     <div class="ml-3 text-sm">
-                        <label for="bem-ocioso" class="font-medium text-gray-700">Bem está ocioso?</label>
+                        <label for="bem-ocioso" class="font-medium text-gray-700 dark:text-gray-300">Bem está ocioso?</label>
                     </div>
                 </div>
                 <div>
-                    <label for="bem-observacoes" class="block text-sm font-medium text-gray-700">Observações</label>
-                    <textarea id="bem-observacoes" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    <label for="bem-observacoes" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Observações</label>
+                    <textarea id="bem-observacoes" rows="3" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
                 <div>
-                    <label for="bem-foto" class="block text-sm font-medium text-gray-700">Foto do Bem</label>
-                    <input type="file" id="bem-foto" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <label for="bem-foto" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Foto do Bem</label>
+                    <input type="file" id="bem-foto" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-gray-600 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-gray-500">
                 </div>
-                <!-- BUG FIX: Error message container -->
                 <p id="add-bem-error" class="text-sm text-center text-red-500 h-4"></p>
                 <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" id="cancel-add-bem" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">Cancelar</button>
+                    <button type="button" id="cancel-add-bem" class="bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Salvar Bem</button>
                 </div>
             </form>
@@ -320,18 +334,18 @@
     
     <!-- Modal para Visualizar Bem -->
     <div id="view-bem-modal" class="modal-overlay hidden">
-        <div id="view-bem-content" class="modal-content relative">
+        <div id="view-bem-content" class="modal-content relative dark:bg-gray-800">
             <!-- Conteúdo será injetado aqui para o PDF -->
         </div>
     </div>
     
     <!-- Modal de Confirmação -->
     <div id="confirm-modal" class="modal-overlay hidden">
-        <div class="modal-content w-full max-w-sm">
-            <h3 id="confirm-modal-title" class="text-lg font-bold mb-4">Confirmar Ação</h3>
-            <p id="confirm-modal-body" class="mb-6">Você tem certeza?</p>
+        <div class="modal-content w-full max-w-sm dark:bg-gray-800">
+            <h3 id="confirm-modal-title" class="text-lg font-bold mb-4 dark:text-white">Confirmar Ação</h3>
+            <p id="confirm-modal-body" class="mb-6 dark:text-gray-300">Você tem certeza?</p>
             <div class="flex justify-end space-x-3">
-                <button id="confirm-modal-cancel" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button id="confirm-modal-cancel" class="bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
                 <button id="confirm-modal-ok" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Confirmar</button>
             </div>
         </div>
@@ -406,9 +420,11 @@
         let bensUnsubscribe = null;
         let bensPorSetorChartInstance = null;
         let bensPorConservacaoChartInstance = null;
+        let currentBens = []; // Variável para guardar os bens atuais
 
         // --- Lógica de Roteamento (Página Pública vs App Principal) ---
         window.addEventListener('DOMContentLoaded', () => {
+            setupTheme(); // Configura o tema na carga inicial
             const params = new URLSearchParams(window.location.search);
             if (params.get('view') === 'public' && params.get('userId') && params.get('bemId')) {
                 handlePublicView(params.get('userId'), params.get('bemId'));
@@ -421,7 +437,7 @@
             appRoot.classList.add('hidden');
             publicViewPage.classList.remove('hidden');
             const publicBemCard = document.getElementById('public-bem-card');
-            publicBemCard.innerHTML = `<div class="text-center"><p class="text-xl">A carregar dados do bem...</p></div>`;
+            publicBemCard.innerHTML = `<div class="text-center"><p class="text-xl dark:text-white">A carregar dados do bem...</p></div>`;
 
             try {
                 const docRef = doc(db, `artifacts/${appId}/users/${userId}/patrimonios`, bemId);
@@ -431,16 +447,16 @@
                     const bemData = docSnap.data();
                     publicBemCard.innerHTML = generateBemDetailHTML(bemData, false, true); // isPublic = true
                     new QRCode(document.getElementById("qrcode-view"), {
-                        text: window.location.href, // URL da própria página pública
+                        text: window.location.href,
                         width: 128,
                         height: 128,
                     });
                 } else {
-                    publicBemCard.innerHTML = `<div class="text-center bg-white p-8 rounded-lg shadow-lg"><p class="text-xl text-red-600 font-bold">Erro</p><p>Ficha patrimonial não encontrada.</p></div>`;
+                    publicBemCard.innerHTML = `<div class="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg"><p class="text-xl text-red-600 font-bold">Erro</p><p class="dark:text-white">Ficha patrimonial não encontrada.</p></div>`;
                 }
             } catch (error) {
                 console.error("Erro ao carregar bem público:", error);
-                publicBemCard.innerHTML = `<div class="text-center bg-white p-8 rounded-lg shadow-lg"><p class="text-xl text-red-600 font-bold">Erro</p><p>Não foi possível carregar os dados. Tente novamente mais tarde.</p></div>`;
+                publicBemCard.innerHTML = `<div class="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg"><p class="text-xl text-red-600 font-bold">Erro</p><p class="dark:text-white">Não foi possível carregar os dados. Tente novamente mais tarde.</p></div>`;
             }
         }
 
@@ -463,6 +479,47 @@
                 }
             });
         }
+        
+        // --- Lógica do Modo Escuro ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function setupTheme() {
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                lightIcon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                darkIcon.classList.remove('hidden');
+            }
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            darkIcon.classList.toggle('hidden');
+            lightIcon.classList.toggle('hidden');
+
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+            // BUG FIX: Atualiza os gráficos após mudar o tema
+            updateDashboard(currentBens);
+        });
+
 
         // --- Lógica de Autenticação ---
         const loginForm = document.getElementById('login-form');
@@ -611,9 +668,9 @@
             if (bensUnsubscribe) bensUnsubscribe();
 
             bensUnsubscribe = onSnapshot(bensCollection, (snapshot) => {
-                const bens = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderBensTable(bens);
-                updateDashboard(bens);
+                currentBens = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderBensTable(currentBens);
+                updateDashboard(currentBens);
             }, (error) => {
                 console.error("Erro ao carregar bens:", error);
             });
@@ -622,24 +679,24 @@
         function renderBensTable(bens) {
             const tableBody = document.getElementById('bens-table-body');
             if (bens.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">Nenhum bem cadastrado.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500 dark:text-gray-400">Nenhum bem cadastrado.</td></tr>';
                 return;
             }
             tableBody.innerHTML = bens.map(bem => `
-                <tr class="border-b hover:bg-gray-50">
+                <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td class="p-4 font-medium">${bem.codigoBem}</td>
                     <td class="p-4">${bem.descricao}</td>
                     <td class="p-4">${bem.setor}</td>
                     <td class="p-4">${bem.estadoConservacao}/10</td>
                     <td class="p-4">
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${bem.ocioso ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800'}">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${bem.ocioso ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-300'}">
                             ${bem.ocioso ? 'Ocioso' : 'Em uso'}
                         </span>
                     </td>
                     <td class="p-4 text-center space-x-2">
-                        <button class="view-btn text-blue-600 hover:text-blue-800" data-id="${bem.id}"><i class="fas fa-eye"></i></button>
-                        <button class="pdf-btn text-red-600 hover:text-red-800" data-id="${bem.id}"><i class="fas fa-file-pdf"></i></button>
-                        <button class="delete-btn text-gray-500 hover:text-gray-700" data-id="${bem.id}"><i class="fas fa-trash"></i></button>
+                        <button class="view-btn text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" data-id="${bem.id}"><i class="fas fa-eye"></i></button>
+                        <button class="pdf-btn text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" data-id="${bem.id}"><i class="fas fa-file-pdf"></i></button>
+                        <button class="delete-btn text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-id="${bem.id}"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
@@ -683,6 +740,12 @@
         }
         
         function updateCharts(bens, setores) {
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const textColor = isDarkMode ? 'rgba(255, 255, 255, 0.85)' : 'rgba(0, 0, 0, 0.85)';
+            const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
+            Chart.defaults.color = textColor;
+
             const bensPorSetorCtx = document.getElementById('bensPorSetorChart').getContext('2d');
             const bensPorSetorData = setores.map(setor => bens.filter(b => b.setor === setor).length);
             
@@ -695,9 +758,14 @@
                         label: 'Bens por Setor',
                         data: bensPorSetorData,
                         backgroundColor: ['#3B82F6', '#F59E0B', '#10B981', '#8B5CF6', '#EC4899', '#6366F1'],
+                        borderColor: isDarkMode ? '#1f2937' : '#fff'
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: textColor } } }
+                }
             });
 
             const bensPorConservacaoCtx = document.getElementById('bensPorConservacaoChart').getContext('2d');
@@ -720,7 +788,18 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
+                    scales: { 
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        },
+                        x: {
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        }
+                    },
+                    plugins: { legend: { labels: { color: textColor } } }
                 }
             });
         }
@@ -768,7 +847,7 @@
                 height: 128,
             });
             
-            await new Promise(resolve => setTimeout(resolve, 400)); // Aumentado para garantir a renderização
+            await new Promise(resolve => setTimeout(resolve, 400));
 
             try {
                 const canvas = await html2canvas(pdfContainer, { scale: 2 });
@@ -795,42 +874,42 @@
             const fotoSrc = bem.fotoUrl || placeholderImg;
 
             return `
-                <div id="pdf-content" class="p-8 bg-white rounded-lg shadow-lg">
-                    <div class="flex justify-between items-start border-b-2 pb-4 mb-4 border-gray-200">
+                <div id="pdf-content" class="p-8 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+                    <div class="flex justify-between items-start border-b-2 pb-4 mb-4 border-gray-200 dark:border-gray-700">
                         <div>
-                            <h3 class="text-3xl font-bold text-gray-800">Ficha Patrimonial</h3>
-                            <p class="text-gray-500">PatriScan System</p>
+                            <h3 class="text-3xl font-bold text-gray-800 dark:text-white">Ficha Patrimonial</h3>
+                            <p class="text-gray-500 dark:text-gray-400">PatriScan System</p>
                         </div>
-                        ${!isPdfMode && !isPublic ? '<button id="close-view-modal" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>' : ''}
+                        ${!isPdfMode && !isPublic ? '<button id="close-view-modal" class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-3xl">&times;</button>' : ''}
                     </div>
                     <div class="grid grid-cols-12 gap-6">
-                        <div class="col-span-12 md:col-span-8 space-y-4">
+                        <div class="col-span-12 md:col-span-8 space-y-4 text-gray-800 dark:text-gray-300">
                             <div class="grid grid-cols-2 gap-4">
-                                <div><p class="text-sm text-gray-500">Código do Bem</p><p class="font-semibold text-lg">${bem.codigoBem}</p></div>
-                                <div><p class="text-sm text-gray-500">Código Anterior</p><p class="font-semibold">${bem.codigoAnterior || 'N/A'}</p></div>
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Código do Bem</p><p class="font-semibold text-lg">${bem.codigoBem}</p></div>
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Código Anterior</p><p class="font-semibold">${bem.codigoAnterior || 'N/A'}</p></div>
                             </div>
-                            <div><p class="text-sm text-gray-500">Descrição</p><p class="font-semibold">${bem.descricao}</p></div>
+                            <div><p class="text-sm text-gray-500 dark:text-gray-400">Descrição</p><p class="font-semibold">${bem.descricao}</p></div>
                             <div class="grid grid-cols-2 gap-4">
-                                <div><p class="text-sm text-gray-500">Órgão</p><p class="font-semibold">${bem.orgao}</p></div>
-                                <div><p class="text-sm text-gray-500">Setor</p><p class="font-semibold">${bem.setor}</p></div>
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Órgão</p><p class="font-semibold">${bem.orgao}</p></div>
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Setor</p><p class="font-semibold">${bem.setor}</p></div>
                             </div>
                              <div class="grid grid-cols-2 gap-4">
-                                <div><p class="text-sm text-gray-500">Vida Útil</p><p class="font-semibold">${bem.vidaUtil} anos</p></div>
-                                <div><p class="text-sm text-gray-500">Período de Utilização</p><p class="font-semibold">${bem.periodoUtilizacao}</p></div>
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Vida Útil</p><p class="font-semibold">${bem.vidaUtil} anos</p></div>
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Período de Utilização</p><p class="font-semibold">${bem.periodoUtilizacao}</p></div>
                             </div>
                              <div class="grid grid-cols-2 gap-4">
-                                <div><p class="text-sm text-gray-500">Estado de Conservação</p><p class="font-semibold">${bem.estadoConservacao}/10</p></div>
-                                <div><p class="text-sm text-gray-500">Status</p><p class="font-semibold">${bem.ocioso ? 'Ocioso' : 'Em Uso'}</p></div>
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Estado de Conservação</p><p class="font-semibold">${bem.estadoConservacao}/10</p></div>
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Status</p><p class="font-semibold">${bem.ocioso ? 'Ocioso' : 'Em Uso'}</p></div>
                             </div>
-                            <div><p class="text-sm text-gray-500">Observações</p><p class="font-semibold">${bem.observacoes || 'Nenhuma'}</p></div>
+                            <div><p class="text-sm text-gray-500 dark:text-gray-400">Observações</p><p class="font-semibold">${bem.observacoes || 'Nenhuma'}</p></div>
                         </div>
-                        <div class="col-span-12 md:col-span-4 flex flex-col items-center justify-center space-y-2 bg-gray-50 p-4 rounded-lg">
-                            <div id="qrcode-view" class="flex items-center justify-center"></div>
-                            <p class="text-xs text-center text-gray-600">Escaneie para ver detalhes</p>
+                        <div class="col-span-12 md:col-span-4 flex flex-col items-center justify-center space-y-2 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                            <div id="qrcode-view" class="flex items-center justify-center bg-white p-1 rounded-md"></div>
+                            <p class="text-xs text-center text-gray-600 dark:text-gray-400">Escaneie para ver detalhes</p>
                             <img src="${fotoSrc}" alt="Foto do bem" class="mt-4 rounded-lg object-cover w-full h-auto">
                         </div>
                     </div>
-                    <div class="border-t-2 pt-4 mt-6 text-sm text-gray-500">
+                    <div class="border-t-2 pt-4 mt-6 text-sm text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700">
                         <p>Ficha gerada em ${new Date().toLocaleString('pt-BR')}. Cadastrado em ${dataFormatada}.</p>
                     </div>
                 </div>
@@ -883,7 +962,8 @@
         }
 
         function resetUI() {
-            document.getElementById('bens-table-body').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">Faça login para ver os bens.</td></tr>';
+            document.getElementById('bens-table-body').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500 dark:text-gray-400">Faça login para ver os bens.</td></tr>';
+            currentBens = [];
             updateDashboard([]);
             if (bensPorSetorChartInstance) bensPorSetorChartInstance.destroy();
             if (bensPorConservacaoChartInstance) bensPorConservacaoChartInstance.destroy();
@@ -930,4 +1010,4 @@
 
     </script>
 </body>
-</html>
+</ht
