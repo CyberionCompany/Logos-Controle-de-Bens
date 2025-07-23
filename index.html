@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PatriScan – Gestão de Patrimônio</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- jsPDF e html2canvas para geração de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- qrcode.js para gerar QR Codes -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+    <!-- Ícones (Heroicons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Estilos personalizados e animações */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            max-width: 90%;
+            width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        #toast-notification {
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        /* Estilo para impressão do PDF */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #pdf-content, #pdf-content * {
+                visibility: visible;
+            }
+            #pdf-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Container Principal da Aplicação -->
+    <div id="app-container" class="min-h-screen">
+
+        <!-- Tela de Login/Cadastro (Inicial) -->
+        <div id="auth-screen" class="flex items-center justify-center min-h-screen bg-gray-200">
+            <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+                <div class="text-center">
+                    <i class="fas fa-barcode text-4xl text-blue-600"></i>
+                    <h1 class="mt-4 text-3xl font-bold text-gray-900">PatriScan</h1>
+                    <p id="auth-title" class="text-gray-600">Acesse sua conta para continuar</p>
+                </div>
+
+                <!-- Formulário de Login -->
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label for="login-email" class="text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="login-email" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="seu@email.com">
+                    </div>
+                    <div>
+                        <label for="login-password" class="text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="login-password" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="********">
+                    </div>
+                    <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">Entrar</button>
+                </form>
+
+                <!-- Formulário de Cadastro -->
+                <form id="register-form" class="hidden space-y-4">
+                     <div>
+                        <label for="register-name" class="text-sm font-medium text-gray-700">Nome Completo</label>
+                        <input type="text" id="register-name" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Seu Nome">
+                    </div>
+                    <div>
+                        <label for="register-email" class="text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="register-email" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="seu@email.com">
+                    </div>
+                    <div>
+                        <label for="register-password" class="text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="register-password" required minlength="6" class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Mínimo 6 caracteres">
+                    </div>
+                    <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">Criar Conta</button>
+                </form>
+
+                <p id="auth-error" class="text-sm text-center text-red-500"></p>
+                <div class="text-center">
+                    <a href="#" id="toggle-auth-mode" class="text-sm text-blue-600 hover:underline">Não tem uma conta? Cadastre-se</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal da Aplicação (Pós-login) -->
+        <div id="main-content" class="hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-md sticky top-0 z-50">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between h-16">
+                        <div class="flex items-center">
+                            <i class="fas fa-barcode text-2xl text-blue-600"></i>
+                            <span class="ml-3 text-xl font-bold text-gray-800">PatriScan</span>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span id="user-email-display" class="text-sm text-gray-600 hidden md:block"></span>
+                            <button id="logout-button" class="flex items-center px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
+                                <i class="fas fa-sign-out-alt mr-2"></i>
+                                Sair
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Corpo da página -->
+            <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+                <!-- Seção do Dashboard -->
+                <div id="dashboard-section" class="fade-in">
+                    <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+                    <!-- Cards de Métricas -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4">
+                            <div class="bg-blue-100 p-3 rounded-full"><i class="fas fa-archive text-2xl text-blue-600"></i></div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Total de Bens</p>
+                                <p id="total-bens" class="text-2xl font-bold">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4">
+                            <div class="bg-yellow-100 p-3 rounded-full"><i class="fas fa-box-open text-2xl text-yellow-600"></i></div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Bens Ociosos</p>
+                                <p id="bens-ociosos" class="text-2xl font-bold">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4">
+                            <div class="bg-green-100 p-3 rounded-full"><i class="fas fa-star-half-alt text-2xl text-green-600"></i></div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Conservação Média</p>
+                                <p id="conservacao-media" class="text-2xl font-bold">0/10</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4">
+                            <div class="bg-purple-100 p-3 rounded-full"><i class="fas fa-building text-2xl text-purple-600"></i></div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Total de Setores</p>
+                                <p id="total-setores" class="text-2xl font-bold">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Gráficos -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-md flex flex-col">
+                            <h3 class="font-bold mb-4">Bens por Setor</h3>
+                            <div class="relative h-72 md:h-80">
+                                <canvas id="bensPorSetorChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md flex flex-col">
+                            <h3 class="font-bold mb-4">Bens por Estado de Conservação</h3>
+                            <div class="relative h-72 md:h-80">
+                                <canvas id="bensPorConservacaoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção de Cadastro e Listagem de Bens -->
+                <div id="bens-section" class="mt-8 fade-in">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <h2 class="text-2xl font-bold">Gerenciamento de Patrimônio</h2>
+                        <div class="flex items-center space-x-2">
+                            <button id="export-csv-button" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center">
+                                <i class="fas fa-file-csv mr-2"></i> Exportar CSV
+                            </button>
+                            <button id="show-add-bem-modal" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Adicionar Bem
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Tabela de Bens -->
+                    <div class="bg-white rounded-xl shadow-md overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-4 font-semibold">Código</th>
+                                    <th class="p-4 font-semibold">Descrição</th>
+                                    <th class="p-4 font-semibold">Setor</th>
+                                    <th class="p-4 font-semibold">Conservação</th>
+                                    <th class="p-4 font-semibold">Status</th>
+                                    <th class="p-4 font-semibold text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bens-table-body">
+                                <tr><td colspan="6" class="p-4 text-center text-gray-500">Nenhum bem cadastrado.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar/Editar Bem -->
+    <div id="add-bem-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="modal-title" class="text-2xl font-bold">Adicionar Novo Bem</h3>
+                <button id="close-add-bem-modal" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+            <form id="add-bem-form" class="space-y-4">
+                <input type="hidden" id="bem-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="bem-orgao" class="block text-sm font-medium text-gray-700">Órgão</label>
+                        <input type="text" id="bem-orgao" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="bem-setor" class="block text-sm font-medium text-gray-700">Setor</label>
+                        <input type="text" id="bem-setor" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="bem-codigo" class="block text-sm font-medium text-gray-700">Código do Bem (Plaqueta)</label>
+                        <input type="text" id="bem-codigo" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="bem-codigo-anterior" class="block text-sm font-medium text-gray-700">Código Anterior (Opcional)</label>
+                        <input type="text" id="bem-codigo-anterior" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label for="bem-descricao" class="block text-sm font-medium text-gray-700">Descrição do Bem</label>
+                    <textarea id="bem-descricao" rows="3" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="bem-vida-util" class="block text-sm font-medium text-gray-700">Vida Útil (anos)</label>
+                        <input type="number" id="bem-vida-util" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="bem-periodo-utilizacao" class="block text-sm font-medium text-gray-700">Período de Utilização</label>
+                        <input type="text" id="bem-periodo-utilizacao" placeholder="Ex: 2 anos, 6 meses" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label for="bem-estado-conservacao" class="block text-sm font-medium text-gray-700">Estado de Conservação (1 a 10)</label>
+                    <input type="range" id="bem-estado-conservacao" min="1" max="10" value="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <span id="conservacao-value" class="text-center block text-sm font-bold">5</span>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                        <input id="bem-ocioso" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="bem-ocioso" class="font-medium text-gray-700">Bem está ocioso?</label>
+                    </div>
+                </div>
+                <div>
+                    <label for="bem-observacoes" class="block text-sm font-medium text-gray-700">Observações</label>
+                    <textarea id="bem-observacoes" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                <div>
+                    <label for="bem-foto" class="block text-sm font-medium text-gray-700">Foto do Bem</label>
+                    <input type="file" id="bem-foto" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+                <!-- BUG FIX: Error message container -->
+                <p id="add-bem-error" class="text-sm text-center text-red-500 h-4"></p>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" id="cancel-add-bem" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Salvar Bem</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para Visualizar Bem -->
+    <div id="view-bem-modal" class="modal-overlay hidden">
+        <div id="view-bem-content" class="modal-content relative">
+            <!-- Conteúdo será injetado aqui para o PDF -->
+        </div>
+    </div>
+    
+    <!-- Modal de Confirmação -->
+    <div id="confirm-modal" class="modal-overlay hidden">
+        <div class="modal-content w-full max-w-sm">
+            <h3 id="confirm-modal-title" class="text-lg font-bold mb-4">Confirmar Ação</h3>
+            <p id="confirm-modal-body" class="mb-6">Você tem certeza?</p>
+            <div class="flex justify-end space-x-3">
+                <button id="confirm-modal-cancel" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button id="confirm-modal-ok" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spinner de Carregamento -->
+    <div id="loading-spinner" class="modal-overlay hidden">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+    </div>
+
+    <!-- Notificação Toast -->
+    <div id="toast-notification" class="fixed top-5 right-5 bg-red-600 text-white py-3 px-5 rounded-lg shadow-lg hidden opacity-0 transform -translate-y-10">
+        <p id="toast-message"></p>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Importações do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged,
+            updateProfile
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            getDocs, 
+            doc, 
+            deleteDoc,
+            onSnapshot,
+            query,
+            where,
+            Timestamp
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        // FEATURE: Importar o Firebase Analytics
+        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+
+        // --- Configuração do Firebase ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config)
+            : { 
+                apiKey: "AIzaSyC8LkY1_voo2AFX0NImfkZjdc1Zrcjn2S8", 
+                authDomain: "logossystemcoleta.firebaseapp.com", 
+                projectId: "logossystemcoleta",
+                storageBucket: "logossystemcoleta.appspot.com", 
+                messagingSenderId: "681461082199", 
+                appId: "1:681461082199:web:0d9012ac945f4d951a9b12" 
+            };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'patriscan-mvp';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const analytics = getAnalytics(app); // FEATURE: Inicializar o Analytics
+
+        // --- Referências de Elementos do DOM ---
+        const authScreen = document.getElementById('auth-screen');
+        const mainContent = document.getElementById('main-content');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        
+        let currentUser = null;
+        let bensUnsubscribe = null;
+        let bensPorSetorChartInstance = null;
+        let bensPorConservacaoChartInstance = null;
+
+        // --- Lógica de Autenticação ---
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const toggleAuthModeLink = document.getElementById('toggle-auth-mode');
+        const authTitle = document.getElementById('auth-title');
+        const authError = document.getElementById('auth-error');
+
+        toggleAuthModeLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.classList.toggle('hidden');
+            registerForm.classList.toggle('hidden');
+            if (registerForm.classList.contains('hidden')) {
+                authTitle.textContent = 'Acesse sua conta para continuar';
+                toggleAuthModeLink.textContent = 'Não tem uma conta? Cadastre-se';
+            } else {
+                authTitle.textContent = 'Crie uma nova conta';
+                toggleAuthModeLink.textContent = 'Já tem uma conta? Faça login';
+            }
+            authError.textContent = '';
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading(true);
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                authError.textContent = '';
+                logEvent(analytics, 'login', { method: 'Email' }); // FEATURE: Evento de login
+            } catch (error) {
+                console.error("Erro no login:", error);
+                authError.textContent = 'Email ou senha inválidos.';
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading(true);
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await updateProfile(userCredential.user, { displayName: name });
+                authError.textContent = '';
+                logEvent(analytics, 'sign_up', { method: 'Email' }); // FEATURE: Evento de cadastro
+            } catch (error) {
+                console.error("Erro no registro:", error);
+                if (error.code === 'auth/email-already-in-use') {
+                    authError.textContent = 'Este email já está em uso.';
+                } else {
+                    authError.textContent = 'Erro ao criar conta. Tente novamente.';
+                }
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        document.getElementById('logout-button').addEventListener('click', async () => {
+            await signOut(auth);
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                authScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                document.getElementById('user-email-display').textContent = user.displayName || user.email;
+                loadBens();
+            } else {
+                currentUser = null;
+                if (bensUnsubscribe) bensUnsubscribe();
+                authScreen.classList.remove('hidden');
+                mainContent.classList.add('hidden');
+                resetUI();
+            }
+        });
+
+        // --- Lógica de Gerenciamento de Bens ---
+        const addBemModal = document.getElementById('add-bem-modal');
+        const addBemForm = document.getElementById('add-bem-form');
+        const addBemError = document.getElementById('add-bem-error');
+        const conservacaoSlider = document.getElementById('bem-estado-conservacao');
+        const conservacaoValue = document.getElementById('conservacao-value');
+
+        document.getElementById('show-add-bem-modal').addEventListener('click', () => {
+            addBemForm.reset();
+            addBemError.textContent = '';
+            document.getElementById('modal-title').textContent = 'Adicionar Novo Bem';
+            conservacaoValue.textContent = '5';
+            addBemModal.classList.remove('hidden');
+        });
+
+        document.getElementById('close-add-bem-modal').addEventListener('click', () => addBemModal.classList.add('hidden'));
+        document.getElementById('cancel-add-bem').addEventListener('click', () => addBemModal.classList.add('hidden'));
+        
+        conservacaoSlider.addEventListener('input', (e) => {
+            conservacaoValue.textContent = e.target.value;
+        });
+
+        addBemForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading(true);
+            addBemError.textContent = '';
+
+            const vidaUtilValue = document.getElementById('bem-vida-util').value;
+            const estadoConservacaoValue = document.getElementById('bem-estado-conservacao').value;
+            const fotoFile = document.getElementById('bem-foto').files[0];
+            let fotoUrl = "";
+
+            try {
+                if (fotoFile) {
+                    const storageRef = ref(storage, `patrimonios/${currentUser.uid}/${Date.now()}-${fotoFile.name}`);
+                    const uploadResult = await uploadBytes(storageRef, fotoFile);
+                    fotoUrl = await getDownloadURL(uploadResult.ref);
+                }
+
+                const bemData = {
+                    orgao: document.getElementById('bem-orgao').value,
+                    setor: document.getElementById('bem-setor').value,
+                    codigoBem: document.getElementById('bem-codigo').value,
+                    codigoAnterior: document.getElementById('bem-codigo-anterior').value,
+                    descricao: document.getElementById('bem-descricao').value,
+                    vidaUtil: Number(vidaUtilValue) || 0,
+                    periodoUtilizacao: document.getElementById('bem-periodo-utilizacao').value,
+                    estadoConservacao: Number(estadoConservacaoValue) || 0,
+                    ocioso: document.getElementById('bem-ocioso').checked,
+                    observacoes: document.getElementById('bem-observacoes').value,
+                    fotoUrl: fotoUrl,
+                    criadoPor: currentUser.uid,
+                    criadoEm: Timestamp.fromDate(new Date())
+                };
+
+                const collectionPath = `artifacts/${appId}/users/${currentUser.uid}/patrimonios`;
+                await addDoc(collection(db, collectionPath), bemData);
+                
+                logEvent(analytics, 'add_bem', { setor: bemData.setor }); // FEATURE: Evento de adicionar bem
+                
+                addBemModal.classList.add('hidden');
+                addBemForm.reset();
+            } catch (error) {
+                console.error("Erro ao adicionar bem: ", error);
+                addBemError.textContent = "Falha ao salvar. Verifique os dados e a conexão.";
+            } finally {
+                showLoading(false);
+            }
+        });
+        
+        function getBensCollectionRef() {
+            if (!currentUser) return null;
+            return collection(db, `artifacts/${appId}/users/${currentUser.uid}/patrimonios`);
+        }
+
+        function loadBens() {
+            const bensCollection = getBensCollectionRef();
+            if (!bensCollection) return;
+
+            if (bensUnsubscribe) bensUnsubscribe();
+
+            bensUnsubscribe = onSnapshot(bensCollection, (snapshot) => {
+                const bens = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderBensTable(bens);
+                updateDashboard(bens);
+            }, (error) => {
+                console.error("Erro ao carregar bens:", error);
+            });
+        }
+
+        function renderBensTable(bens) {
+            const tableBody = document.getElementById('bens-table-body');
+            if (bens.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">Nenhum bem cadastrado.</td></tr>';
+                return;
+            }
+            tableBody.innerHTML = bens.map(bem => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-4 font-medium">${bem.codigoBem}</td>
+                    <td class="p-4">${bem.descricao}</td>
+                    <td class="p-4">${bem.setor}</td>
+                    <td class="p-4">${bem.estadoConservacao}/10</td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${bem.ocioso ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800'}">
+                            ${bem.ocioso ? 'Ocioso' : 'Em uso'}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center space-x-2">
+                        <button class="view-btn text-blue-600 hover:text-blue-800" data-id="${bem.id}"><i class="fas fa-eye"></i></button>
+                        <button class="pdf-btn text-red-600 hover:text-red-800" data-id="${bem.id}"><i class="fas fa-file-pdf"></i></button>
+                        <button class="delete-btn text-gray-500 hover:text-gray-700" data-id="${bem.id}"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', (e) => viewBem(e.currentTarget.dataset.id, bens)));
+            document.querySelectorAll('.pdf-btn').forEach(btn => btn.addEventListener('click', (e) => generatePDF(e.currentTarget.dataset.id, bens)));
+            document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', (e) => deleteBem(e.currentTarget.dataset.id)));
+        }
+
+        async function deleteBem(id) {
+            const confirmed = await showConfirm("Excluir Bem", "Tem certeza que deseja excluir este bem? Esta ação é irreversível.");
+            if (!confirmed) return;
+            
+            showLoading(true);
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/patrimonios`, id);
+                await deleteDoc(docRef);
+                showToast("Bem excluído com sucesso.", "success");
+            } catch(error) {
+                console.error("Erro ao deletar bem:", error);
+                showToast("Não foi possível excluir o bem.");
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // --- Lógica do Dashboard ---
+        function updateDashboard(bens) {
+            const totalBens = bens.length;
+            const bensOciosos = bens.filter(b => b.ocioso).length;
+            const setores = [...new Set(bens.map(b => b.setor))];
+            const conservacaoTotal = bens.reduce((acc, b) => acc + (b.estadoConservacao || 0), 0);
+            const conservacaoMedia = totalBens > 0 ? (conservacaoTotal / totalBens).toFixed(1) : 0;
+
+            document.getElementById('total-bens').textContent = totalBens;
+            document.getElementById('bens-ociosos').textContent = bensOciosos;
+            document.getElementById('conservacao-media').textContent = `${conservacaoMedia}/10`;
+            document.getElementById('total-setores').textContent = setores.length;
+            
+            updateCharts(bens, setores);
+        }
+        
+        function updateCharts(bens, setores) {
+            const bensPorSetorCtx = document.getElementById('bensPorSetorChart').getContext('2d');
+            const bensPorSetorData = setores.map(setor => bens.filter(b => b.setor === setor).length);
+            
+            if (bensPorSetorChartInstance) bensPorSetorChartInstance.destroy();
+            bensPorSetorChartInstance = new Chart(bensPorSetorCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: setores,
+                    datasets: [{
+                        label: 'Bens por Setor',
+                        data: bensPorSetorData,
+                        backgroundColor: ['#3B82F6', '#F59E0B', '#10B981', '#8B5CF6', '#EC4899', '#6366F1'],
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const bensPorConservacaoCtx = document.getElementById('bensPorConservacaoChart').getContext('2d');
+            const conservacaoLabels = Array.from({length: 10}, (_, i) => i + 1);
+            const bensPorConservacaoData = conservacaoLabels.map(nota => bens.filter(b => b.estadoConservacao === nota).length);
+
+            if (bensPorConservacaoChartInstance) bensPorConservacaoChartInstance.destroy();
+            bensPorConservacaoChartInstance = new Chart(bensPorConservacaoCtx, {
+                type: 'bar',
+                data: {
+                    labels: conservacaoLabels.map(n => `Nota ${n}`),
+                    datasets: [{
+                        label: 'Nº de Bens',
+                        data: bensPorConservacaoData,
+                        backgroundColor: '#3B82F6',
+                        borderColor: '#1E40AF',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // --- Lógica de Visualização e PDF ---
+        const viewBemModal = document.getElementById('view-bem-modal');
+        const viewBemContent = document.getElementById('view-bem-content');
+
+        function viewBem(id, bens) {
+            const bem = bens.find(b => b.id === id);
+            if (!bem) return;
+            
+            viewBemContent.innerHTML = generateBemDetailHTML(bem);
+            viewBemModal.classList.remove('hidden');
+            
+            new QRCode(document.getElementById("qrcode-view"), {
+                text: `${window.location.href}?bem=${bem.id}`,
+                width: 128,
+                height: 128,
+            });
+
+            document.getElementById('close-view-modal').addEventListener('click', () => {
+                viewBemModal.classList.add('hidden');
+            });
+        }
+        
+        async function generatePDF(id, bens) {
+            const bem = bens.find(b => b.id === id);
+            if (!bem) return;
+            
+            showLoading(true);
+            
+            const pdfContainer = document.createElement('div');
+            pdfContainer.style.position = 'absolute';
+            pdfContainer.style.left = '-9999px';
+            pdfContainer.style.width = '800px';
+            pdfContainer.innerHTML = generateBemDetailHTML(bem, true);
+            document.body.appendChild(pdfContainer);
+
+            new QRCode(pdfContainer.querySelector("#qrcode-view"), {
+                text: `${window.location.href}?bem=${bem.id}`,
+                width: 128,
+                height: 128,
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 200));
+
+            try {
+                const canvas = await html2canvas(pdfContainer, { scale: 2 });
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jspdf.jsPDF({
+                    orientation: 'portrait',
+                    unit: 'px',
+                    format: [canvas.width, canvas.height]
+                });
+                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+                pdf.save(`FichaPatrimonial_${bem.codigoBem}.pdf`);
+            } catch (error) {
+                console.error("Erro ao gerar PDF:", error);
+                showToast("Não foi possível gerar o PDF.");
+            } finally {
+                document.body.removeChild(pdfContainer);
+                showLoading(false);
+            }
+        }
+        
+        function generateBemDetailHTML(bem, isPdfMode = false) {
+            const dataFormatada = bem.criadoEm.toDate ? bem.criadoEm.toDate().toLocaleDateString('pt-BR') : new Date(bem.criadoEm).toLocaleDateString('pt-BR');
+            const placeholderImg = "https://placehold.co/200x150/e2e8f0/adb5bd?text=Foto+do+Bem";
+            const fotoSrc = bem.fotoUrl || placeholderImg;
+
+            return `
+                <div id="pdf-content" class="p-8 bg-white rounded-lg">
+                    <div class="flex justify-between items-start border-b-2 pb-4 mb-4 border-gray-200">
+                        <div>
+                            <h3 class="text-3xl font-bold text-gray-800">Ficha Patrimonial</h3>
+                            <p class="text-gray-500">PatriScan System</p>
+                        </div>
+                        ${!isPdfMode ? '<button id="close-view-modal" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>' : ''}
+                    </div>
+                    <div class="grid grid-cols-12 gap-6">
+                        <div class="col-span-12 md:col-span-8 space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><p class="text-sm text-gray-500">Código do Bem</p><p class="font-semibold text-lg">${bem.codigoBem}</p></div>
+                                <div><p class="text-sm text-gray-500">Código Anterior</p><p class="font-semibold">${bem.codigoAnterior || 'N/A'}</p></div>
+                            </div>
+                            <div><p class="text-sm text-gray-500">Descrição</p><p class="font-semibold">${bem.descricao}</p></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><p class="text-sm text-gray-500">Órgão</p><p class="font-semibold">${bem.orgao}</p></div>
+                                <div><p class="text-sm text-gray-500">Setor</p><p class="font-semibold">${bem.setor}</p></div>
+                            </div>
+                             <div class="grid grid-cols-2 gap-4">
+                                <div><p class="text-sm text-gray-500">Vida Útil</p><p class="font-semibold">${bem.vidaUtil} anos</p></div>
+                                <div><p class="text-sm text-gray-500">Período de Utilização</p><p class="font-semibold">${bem.periodoUtilizacao}</p></div>
+                            </div>
+                             <div class="grid grid-cols-2 gap-4">
+                                <div><p class="text-sm text-gray-500">Estado de Conservação</p><p class="font-semibold">${bem.estadoConservacao}/10</p></div>
+                                <div><p class="text-sm text-gray-500">Status</p><p class="font-semibold">${bem.ocioso ? 'Ocioso' : 'Em Uso'}</p></div>
+                            </div>
+                            <div><p class="text-sm text-gray-500">Observações</p><p class="font-semibold">${bem.observacoes || 'Nenhuma'}</p></div>
+                        </div>
+                        <div class="col-span-12 md:col-span-4 flex flex-col items-center justify-center space-y-2 bg-gray-50 p-4 rounded-lg">
+                            <div id="qrcode-view" class="flex items-center justify-center"></div>
+                            <p class="text-xs text-center text-gray-600">Escaneie para ver detalhes</p>
+                            <img src="${fotoSrc}" alt="Foto do bem" class="mt-4 rounded-lg object-cover w-full h-auto">
+                        </div>
+                    </div>
+                    <div class="border-t-2 pt-4 mt-6 text-sm text-gray-500">
+                        <p>Ficha gerada em ${new Date().toLocaleString('pt-BR')}. Cadastrado em ${dataFormatada}.</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // --- Lógica de Exportação CSV ---
+        document.getElementById('export-csv-button').addEventListener('click', async () => {
+            showLoading(true);
+            const bensCollection = getBensCollectionRef();
+            if(!bensCollection) {
+                showLoading(false);
+                return;
+            }
+            
+            const querySnapshot = await getDocs(bensCollection);
+            const bens = querySnapshot.docs.map(doc => doc.data());
+
+            if (bens.length === 0) {
+                showToast("Nenhum bem para exportar.");
+                showLoading(false);
+                return;
+            }
+
+            logEvent(analytics, 'export_csv'); // FEATURE: Evento de exportar CSV
+
+            const headers = Object.keys(bens[0]).join(',');
+            const rows = bens.map(bem => {
+                return Object.values(bem).map(value => {
+                    const strValue = String(value);
+                    if (strValue.includes(',')) return `"${strValue}"`;
+                    return strValue;
+                }).join(',');
+            });
+
+            const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "patrimonio_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showLoading(false);
+        });
+
+        // --- Funções Utilitárias ---
+        function showLoading(isLoading) {
+            loadingSpinner.classList.toggle('hidden', !isLoading);
+        }
+
+        function resetUI() {
+            document.getElementById('bens-table-body').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">Faça login para ver os bens.</td></tr>';
+            updateDashboard([]);
+            if (bensPorSetorChartInstance) bensPorSetorChartInstance.destroy();
+            if (bensPorConservacaoChartInstance) bensPorConservacaoChartInstance.destroy();
+        }
+
+        const confirmModal = document.getElementById('confirm-modal');
+        function showConfirm(title, body) {
+            return new Promise((resolve) => {
+                document.getElementById('confirm-modal-title').textContent = title;
+                document.getElementById('confirm-modal-body').textContent = body;
+                confirmModal.classList.remove('hidden');
+
+                document.getElementById('confirm-modal-cancel').onclick = () => {
+                    confirmModal.classList.add('hidden');
+                    resolve(false);
+                };
+                document.getElementById('confirm-modal-ok').onclick = () => {
+                    confirmModal.classList.add('hidden');
+                    resolve(true);
+                };
+            });
+        }
+
+        const toast = document.getElementById('toast-notification');
+        const toastMessage = document.getElementById('toast-message');
+        let toastTimeout;
+        function showToast(message, type = 'error') {
+            toastMessage.textContent = message;
+            toast.classList.remove('bg-red-600', 'bg-green-600');
+            if (type === 'success') {
+                toast.classList.add('bg-green-600');
+            } else {
+                toast.classList.add('bg-red-600');
+            }
+            
+            toast.classList.remove('hidden', 'opacity-0', '-translate-y-10');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-10');
+                setTimeout(() => toast.classList.add('hidden'), 500);
+            }, 3000);
+        }
+
+    </script>
+</body>
+</html>
