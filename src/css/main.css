@@ -1,0 +1,58 @@
+  /* Estilos personalizados e animações */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            background: white;
+            padding: 1.5rem; /* Padding reduzido para mobile */
+            border-radius: 0.75rem;
+            max-width: 90%;
+            width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @media (min-width: 640px) {
+            .modal-content {
+                padding: 2rem;
+            }
+        }
+        #toast-notification {
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        /* Estilo para impressão do PDF */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #pdf-content, #pdf-content * {
+                visibility: visible;
+            }
+            #pdf-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
