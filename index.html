@@ -376,7 +376,13 @@
                 </div>
                 <div>
                     <label for="bem-foto" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Foto do Bem</label>
-                    <input type="file" id="bem-foto" accept="image/*" capture="environment" class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-gray-600 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-gray-500">
+                    <div class="mt-1 flex items-center space-x-2">
+                        <input type="file" id="bem-foto" accept="image/*" class="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-gray-600 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-gray-500">
+                        <button type="button" id="take-photo-button" class="p-2.5 bg-gray-200 dark:bg-gray-600 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 hidden">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    <img id="photo-preview" class="hidden mt-2 rounded-md h-24 w-auto"/>
                 </div>
                 <p id="add-bem-error" class="text-sm text-center text-red-500 h-4"></p>
                 <div class="flex justify-end space-x-3 pt-2">
@@ -402,6 +408,18 @@
             <div class="flex justify-end space-x-3">
                 <button id="confirm-modal-cancel" class="bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
                 <button id="confirm-modal-ok" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal da Câmera -->
+    <div id="camera-modal" class="modal-overlay hidden">
+        <div class="modal-content dark:bg-gray-800 w-full max-w-lg">
+            <video id="camera-stream" autoplay playsinline class="w-full rounded-md"></video>
+            <canvas id="photo-canvas" class="hidden"></canvas>
+            <div class="mt-4 flex justify-center space-x-4">
+                <button id="capture-button" class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 text-lg"><i class="fas fa-camera"></i></button>
+                <button id="cancel-camera-button" class="bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
             </div>
         </div>
     </div>
@@ -481,6 +499,7 @@
         let filteredBens = [];
         let currentPage = 1;
         const itemsPerPage = 10;
+        let cameraStream = null;
 
         // --- Lógica de Roteamento (Página Pública vs App Principal) ---
         window.addEventListener('DOMContentLoaded', () => {
@@ -962,7 +981,7 @@
         function generateBemDetailHTML(bem, isPdfMode = false, isPublic = false, bemId = '') {
             const dataFormatada = bem.criadoEm.toDate ? bem.criadoEm.toDate().toLocaleDateString('pt-BR') : new Date(bem.criadoEm).toLocaleDateString('pt-BR');
             const placeholderImg = "https://placehold.co/200x150/e2e8f0/adb5bd?text=Foto+do+Bem";
-            const logoPlaceholder = "../src/utilites/logo.png";
+            const logoPlaceholder = "https://placehold.co/150x50/e2e8f0/adb5bd?text=Sua+Logo";
             const fotoSrc = bem.fotoUrl || placeholderImg;
 
             return `
