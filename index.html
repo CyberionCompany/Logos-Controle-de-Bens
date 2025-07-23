@@ -88,52 +88,78 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
     <!-- Container da Aplicação Principal -->
     <div id="app-root">
         <!-- Tela de Login/Cadastro (Inicial) -->
-        <div id="auth-screen" class="flex items-center justify-center min-h-screen bg-gray-200 dark:bg-gray-800">
-            <div class="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-900 rounded-xl shadow-lg">
-                <div class="text-center">
-                    <i class="fas fa-barcode text-4xl text-blue-600"></i>
-                    <h1 class="mt-4 text-3xl font-bold text-gray-900 dark:text-white">PatriScan</h1>
-                    <p id="auth-title" class="text-gray-600 dark:text-gray-400">Acesse sua conta para continuar</p>
+        <div id="auth-screen" class="flex min-h-screen">
+            <div class="flex flex-1 flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+                <div class="mx-auto w-full max-w-sm lg:w-96">
+                    <div class="text-left">
+                        <div class="flex items-center text-blue-600 dark:text-blue-500 mb-4">
+                            <i class="fas fa-barcode text-3xl"></i>
+                            <span class="ml-3 text-2xl font-bold text-gray-900 dark:text-white">LogosTrack</span>
+                        </div>
+                        <h2 id="auth-title" class="mt-6 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Acesse sua conta</h2>
+                        <p id="auth-subtitle" class="mt-2 text-sm text-gray-600 dark:text-gray-400">Bem-vindo de volta! Por favor, insira seus dados.</p>
+                    </div>
+    
+                    <div class="mt-8">
+                        <!-- Formulário de Login -->
+                        <form id="login-form" class="space-y-6">
+                            <div>
+                                <label for="login-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                                <div class="mt-1">
+                                    <input id="login-email" type="email" required class="block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
+                                </div>
+                            </div>
+    
+                            <div class="space-y-1">
+                                <label for="login-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
+                                <div class="mt-1">
+                                    <input id="login-password" type="password" required class="block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
+                                </div>
+                            </div>
+    
+                            <button type="submit" class="flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Entrar</button>
+                        </form>
+    
+                        <!-- Formulário de Cadastro -->
+                        <form id="register-form" class="hidden space-y-6">
+                            <div>
+                                <label for="register-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome Completo</label>
+                                <div class="mt-1">
+                                    <input id="register-name" type="text" required class="block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="register-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                                <div class="mt-1">
+                                    <input id="register-email" type="email" required class="block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <label for="register-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
+                                <div class="mt-1">
+                                    <input id="register-password" type="password" required minlength="6" class="block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
+                                </div>
+                            </div>
+                            <button type="submit" class="flex w-full justify-center rounded-md border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">Criar Conta</button>
+                        </form>
+    
+                        <p id="auth-error" class="text-sm text-center text-red-500 mt-4"></p>
+                        <div class="mt-6 text-center">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                <a href="#" id="toggle-auth-mode" class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">Não tem uma conta? Cadastre-se</a>
+                            </p>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- Formulário de Login -->
-                <form id="login-form" class="space-y-4">
-                    <div>
-                        <label for="login-email" class="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                        <input type="email" id="login-email" required class="w-full px-4 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="seu@email.com">
-                    </div>
-                    <div>
-                        <label for="login-password" class="text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
-                        <input type="password" id="login-password" required class="w-full px-4 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="********">
-                    </div>
-                    <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">Entrar</button>
-                </form>
-
-                <!-- Formulário de Cadastro -->
-                <form id="register-form" class="hidden space-y-4">
-                     <div>
-                        <label for="register-name" class="text-sm font-medium text-gray-700 dark:text-gray-300">Nome Completo</label>
-                        <input type="text" id="register-name" required class="w-full px-4 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Seu Nome">
-                    </div>
-                    <div>
-                        <label for="register-email" class="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                        <input type="email" id="register-email" required class="w-full px-4 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="seu@email.com">
-                    </div>
-                    <div>
-                        <label for="register-password" class="text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
-                        <input type="password" id="register-password" required minlength="6" class="w-full px-4 py-2 mt-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Mínimo 6 caracteres">
-                    </div>
-                    <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">Criar Conta</button>
-                </form>
-
-                <p id="auth-error" class="text-sm text-center text-red-500"></p>
-                <div class="text-center">
-                    <a href="#" id="toggle-auth-mode" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">Não tem uma conta? Cadastre-se</a>
+            </div>
+            <div class="relative hidden w-0 flex-1 lg:block bg-gray-50 dark:bg-gray-800/50">
+                <div class="absolute inset-0 h-full w-full flex items-center justify-center">
+                    <div class="w-96 h-96 bg-gradient-to-tr from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 rounded-full opacity-30 dark:opacity-20 blur-3xl"></div>
                 </div>
             </div>
         </div>
@@ -146,7 +172,7 @@
                     <div class="flex items-center justify-between h-16">
                         <div class="flex items-center">
                             <i class="fas fa-barcode text-2xl text-blue-600"></i>
-                            <span class="ml-3 text-xl font-bold text-gray-800 dark:text-white">PatriScan</span>
+                            <span class="ml-3 text-xl font-bold text-gray-800 dark:text-white">LogosTrack</span>
                         </div>
                         <div class="flex items-center space-x-4">
                             <span id="user-email-display" class="text-sm text-gray-600 dark:text-gray-400 hidden md:block"></span>
@@ -547,10 +573,12 @@
             loginForm.classList.toggle('hidden');
             registerForm.classList.toggle('hidden');
             if (registerForm.classList.contains('hidden')) {
-                authTitle.textContent = 'Acesse sua conta para continuar';
+                authTitle.textContent = 'Acesse sua conta';
+                document.getElementById('auth-subtitle').textContent = 'Bem-vindo de volta! Por favor, insira seus dados.';
                 toggleAuthModeLink.textContent = 'Não tem uma conta? Cadastre-se';
             } else {
-                authTitle.textContent = 'Crie uma nova conta';
+                authTitle.textContent = 'Crie a sua conta';
+                document.getElementById('auth-subtitle').textContent = 'Comece a gerir o seu património de forma eficiente.';
                 toggleAuthModeLink.textContent = 'Já tem uma conta? Faça login';
             }
             authError.textContent = '';
@@ -894,7 +922,7 @@
         function generateBemDetailHTML(bem, isPdfMode = false, isPublic = false, bemId = '') {
             const dataFormatada = bem.criadoEm.toDate ? bem.criadoEm.toDate().toLocaleDateString('pt-BR') : new Date(bem.criadoEm).toLocaleDateString('pt-BR');
             const placeholderImg = "https://placehold.co/200x150/e2e8f0/adb5bd?text=Foto+do+Bem";
-            const logoPlaceholder = "../src/utilites/logo.png";
+            const logoPlaceholder = "https://placehold.co/150x50/e2e8f0/adb5bd?text=Sua+Logo";
             const fotoSrc = bem.fotoUrl || placeholderImg;
 
             return `
@@ -1104,4 +1132,4 @@
 
     </script>
 </body>
-</html>
+</ht
