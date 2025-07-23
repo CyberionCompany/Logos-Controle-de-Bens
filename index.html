@@ -768,7 +768,7 @@
                 height: 128,
             });
             
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await new Promise(resolve => setTimeout(resolve, 400)); // Aumentado para garantir a renderização
 
             try {
                 const canvas = await html2canvas(pdfContainer, { scale: 2 });
