@@ -303,8 +303,7 @@
     </div>
 
     <div id="public-view-page" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div id="public-bem-card" class="w-full max-w-3xl">
-            </div>
+        <div id="public-bem-card" class="w-full max-w-3xl"></div>
     </div>
 
     <div id="add-bem-modal" class="modal-overlay hidden">
@@ -335,9 +334,15 @@
                         <input type="text" id="bem-codigo-anterior" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
-                <div>
-                    <label for="bem-valor" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Valor do Bem (R$)</label>
-                    <input type="number" id="bem-valor" step="0.01" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="bem-valor" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Valor de Aquisição (R$)</label>
+                        <input type="number" id="bem-valor" step="0.01" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="bem-valor-residual" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Valor Residual (R$)</label>
+                        <input type="number" id="bem-valor-residual" step="0.01" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
                 </div>
                 <div>
                     <label for="bem-descricao" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descrição do Bem</label>
@@ -387,8 +392,7 @@
     </div>
     
     <div id="view-bem-modal" class="modal-overlay hidden">
-        <div id="view-bem-content" class="modal-content relative dark:bg-gray-800">
-            </div>
+        <div id="view-bem-content" class="modal-content relative dark:bg-gray-800"></div>
     </div>
     
     <div id="confirm-modal" class="modal-overlay hidden">
@@ -450,10 +454,8 @@
         import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
         // --- Configuração do Cloudinary ---
-        // IMPORTANTE: Substitua com seus próprios dados do Cloudinary.
-        // Você precisa criar um "upload preset" para upload não assinado no seu dashboard do Cloudinary.
-        const CLOUDINARY_CLOUD_NAME = "dt7jg4zci"; // Coloque seu Cloud Name aqui
-        const CLOUDINARY_UPLOAD_PRESET = "logostrack"; // Coloque seu Upload Preset aqui
+        const CLOUDINARY_CLOUD_NAME = "dt7jg4zci";
+        const CLOUDINARY_UPLOAD_PRESET = "logostrack";
 
         // --- Configuração do Firebase ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' 
@@ -472,7 +474,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        // const storage = getStorage(app); // Removido, não é mais necessário
         const analytics = getAnalytics(app);
 
         // --- Referências de Elementos do DOM ---
@@ -490,9 +491,8 @@
         let filteredBens = [];
         let currentPage = 1;
         const itemsPerPage = 10;
-        let cameraStream = null;
 
-        // --- Lógica de Roteamento (Página Pública vs App Principal) ---
+        // --- Lógica de Roteamento ---
         window.addEventListener('DOMContentLoaded', () => {
             setupTheme();
             const params = new URLSearchParams(window.location.search);
@@ -624,7 +624,6 @@
                 authError.textContent = '';
                 logEvent(analytics, 'login', { method: 'Email' });
             } catch (error) {
-                console.error("Erro no login:", error);
                 authError.textContent = 'Email ou senha inválidos.';
             } finally {
                 showLoading(false);
@@ -643,7 +642,6 @@
                 authError.textContent = '';
                 logEvent(analytics, 'sign_up', { method: 'Email' });
             } catch (error) {
-                console.error("Erro no registro:", error);
                 if (error.code === 'auth/email-already-in-use') {
                     authError.textContent = 'Este email já está em uso.';
                 } else {
@@ -661,7 +659,6 @@
                 authError.textContent = '';
                 logEvent(analytics, 'login', { method: 'Google' });
             } catch (error) {
-                console.error("Erro no login com Google:", error);
                 authError.textContent = 'Falha ao autenticar com o Google.';
             } finally {
                 showLoading(false);
@@ -672,32 +669,16 @@
             await signOut(auth);
         });
 
-        // --- NOVA Lógica de Upload para Cloudinary ---
+        // --- Lógica de Upload para Cloudinary ---
         async function uploadImageToCloudinary(file) {
-            if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME === "SEU_CLOUD_NAME_AQUI") {
-                 throw new Error("Configuração do Cloudinary incompleta: 'CLOUD_NAME' não definido.");
-            }
-            if (!CLOUDINARY_UPLOAD_PRESET || CLOUDINARY_UPLOAD_PRESET === "SEU_UPLOAD_PRESET_AQUI") {
-                 throw new Error("Configuração do Cloudinary incompleta: 'UPLOAD_PRESET' não definido.");
-            }
-
             const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
-            const response = await fetch(url, {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Erro no upload para o Cloudinary: ${errorData.error.message}`);
-            }
-
+            const response = await fetch(url, { method: 'POST', body: formData });
+            if (!response.ok) throw new Error('Erro no upload para o Cloudinary');
             const data = await response.json();
-            return data.secure_url; // Retorna a URL segura da imagem
+            return data.secure_url;
         }
 
         // --- Lógica de Gerenciamento de Bens ---
@@ -709,7 +690,6 @@
         const fotoInput = document.getElementById('bem-foto');
         const photoPreview = document.getElementById('photo-preview');
 
-        // Preview da imagem selecionada
         fotoInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -739,12 +719,10 @@
             e.preventDefault();
             showLoading(true);
             addBemError.textContent = '';
-
             const fotoFile = fotoInput.files[0];
             let fotoUrl = "";
 
             try {
-                // Se um arquivo de foto foi selecionado, faz o upload para o Cloudinary
                 if (fotoFile) {
                     fotoUrl = await uploadImageToCloudinary(fotoFile);
                 }
@@ -754,6 +732,7 @@
                     setor: document.getElementById('bem-setor').value,
                     codigoBem: document.getElementById('bem-codigo').value,
                     valor: Number(document.getElementById('bem-valor').value) || 0,
+                    valorResidual: Number(document.getElementById('bem-valor-residual').value) || 0, // SALVA O NOVO CAMPO
                     codigoAnterior: document.getElementById('bem-codigo-anterior').value,
                     descricao: document.getElementById('bem-descricao').value,
                     vidaUtil: Number(document.getElementById('bem-vida-util').value) || 0,
@@ -761,7 +740,7 @@
                     estadoConservacao: Number(document.getElementById('bem-estado-conservacao').value) || 0,
                     ocioso: document.getElementById('bem-ocioso').checked,
                     observacoes: document.getElementById('bem-observacoes').value,
-                    fotoUrl: fotoUrl, // Salva a URL do Cloudinary (ou string vazia)
+                    fotoUrl: fotoUrl,
                     criadoPor: currentUser.uid,
                     criadoEm: Timestamp.fromDate(new Date())
                 };
@@ -774,8 +753,7 @@
                 addBemModal.classList.add('hidden');
                 addBemForm.reset();
             } catch (error) {
-                console.error("Erro ao adicionar bem: ", error);
-                addBemError.textContent = error.message || "Falha ao salvar. Verifique os dados e a conexão.";
+                addBemError.textContent = error.message || "Falha ao salvar.";
             } finally {
                 showLoading(false);
             }
@@ -789,15 +767,11 @@
         function loadBens() {
             const bensCollection = getBensCollectionRef();
             if (!bensCollection) return;
-
             if (bensUnsubscribe) bensUnsubscribe();
-
             bensUnsubscribe = onSnapshot(bensCollection, (snapshot) => {
                 currentBens = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 applyFiltersAndRender();
                 updateDashboard(currentBens);
-            }, (error) => {
-                console.error("Erro ao carregar bens:", error);
             });
         }
         
@@ -823,8 +797,7 @@
                         <button class="pdf-btn text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" data-id="${bem.id}"><i class="fas fa-file-pdf"></i></button>
                         <button class="delete-btn text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" data-id="${bem.id}"><i class="fas fa-trash"></i></button>
                     </td>
-                </tr>
-            `).join('');
+                </tr>`).join('');
             
             document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', (e) => viewBem(e.currentTarget.dataset.id, currentBens)));
             document.querySelectorAll('.pdf-btn').forEach(btn => btn.addEventListener('click', (e) => generatePDF(e.currentTarget.dataset.id, currentBens)));
@@ -834,14 +807,11 @@
         async function deleteBem(id) {
             const confirmed = await showConfirm("Excluir Bem", "Tem certeza que deseja excluir este bem? Esta ação é irreversível.");
             if (!confirmed) return;
-            
             showLoading(true);
             try {
-                const docRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/patrimonios`, id);
-                await deleteDoc(docRef);
+                await deleteDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}/patrimonios`, id));
                 showToast("Bem excluído com sucesso.", "success");
             } catch(error) {
-                console.error("Erro ao deletar bem:", error);
                 showToast("Não foi possível excluir o bem.");
             } finally {
                 showLoading(false);
@@ -857,16 +827,13 @@
             const setores = [...new Set(bens.map(b => b.setor))];
             const conservacaoTotal = bens.reduce((acc, b) => acc + (b.estadoConservacao || 0), 0);
             const conservacaoMedia = totalBens > 0 ? (conservacaoTotal / totalBens).toFixed(1) : 0;
-
             const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
             document.getElementById('total-bens').textContent = totalBens;
             document.getElementById('valor-total').textContent = formatCurrency(valorTotal);
             document.getElementById('valor-risco').textContent = formatCurrency(valorRisco);
             document.getElementById('bens-ociosos').textContent = bensOciosos.length;
             document.getElementById('conservacao-media').textContent = `${conservacaoMedia}/10`;
             document.getElementById('total-setores').textContent = setores.length;
-            
             updateCharts(bens, setores);
         }
         
@@ -874,64 +841,23 @@
             const isDarkMode = document.documentElement.classList.contains('dark');
             const textColor = isDarkMode ? 'rgba(255, 255, 255, 0.85)' : 'rgba(0, 0, 0, 0.85)';
             const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-
             Chart.defaults.color = textColor;
-
             const bensPorSetorCtx = document.getElementById('bensPorSetorChart').getContext('2d');
             const bensPorSetorData = setores.map(setor => bens.filter(b => b.setor === setor).length);
-            
             if (bensPorSetorChartInstance) bensPorSetorChartInstance.destroy();
             bensPorSetorChartInstance = new Chart(bensPorSetorCtx, {
                 type: 'doughnut',
-                data: {
-                    labels: setores,
-                    datasets: [{
-                        label: 'Bens por Setor',
-                        data: bensPorSetorData,
-                        backgroundColor: ['#3B82F6', '#F59E0B', '#10B981', '#8B5CF6', '#EC4899', '#6366F1'],
-                        borderColor: isDarkMode ? '#1f2937' : '#fff'
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: textColor } } }
-                }
+                data: { labels: setores, datasets: [{ label: 'Bens por Setor', data: bensPorSetorData, backgroundColor: ['#3B82F6', '#F59E0B', '#10B981', '#8B5CF6', '#EC4899', '#6366F1'], borderColor: isDarkMode ? '#1f2937' : '#fff' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: textColor } } } }
             });
-
             const bensPorConservacaoCtx = document.getElementById('bensPorConservacaoChart').getContext('2d');
             const conservacaoLabels = Array.from({length: 10}, (_, i) => i + 1);
             const bensPorConservacaoData = conservacaoLabels.map(nota => bens.filter(b => b.estadoConservacao === nota).length);
-
             if (bensPorConservacaoChartInstance) bensPorConservacaoChartInstance.destroy();
             bensPorConservacaoChartInstance = new Chart(bensPorConservacaoCtx, {
                 type: 'bar',
-                data: {
-                    labels: conservacaoLabels.map(n => `Nota ${n}`),
-                    datasets: [{
-                        label: 'Nº de Bens',
-                        data: bensPorConservacaoData,
-                        backgroundColor: '#3B82F6',
-                        borderColor: '#1E40AF',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { 
-                        y: { 
-                            beginAtZero: true,
-                            grid: { color: gridColor },
-                            ticks: { color: textColor }
-                        },
-                        x: {
-                            grid: { color: gridColor },
-                            ticks: { color: textColor }
-                        }
-                    },
-                    plugins: { legend: { labels: { color: textColor } } }
-                }
+                data: { labels: conservacaoLabels.map(n => `Nota ${n}`), datasets: [{ label: 'Nº de Bens', data: bensPorConservacaoData, backgroundColor: '#3B82F6', borderColor: '#1E40AF', borderWidth: 1 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, x: { grid: { color: gridColor }, ticks: { color: textColor } } }, plugins: { legend: { labels: { color: textColor } } } }
             });
         }
 
@@ -942,17 +868,10 @@
         function viewBem(id, bens) {
             const bem = bens.find(b => b.id === id);
             if (!bem) return;
-            
             viewBemContent.innerHTML = generateBemDetailHTML(bem, false, false, id);
             viewBemModal.classList.remove('hidden');
-            
             const publicUrl = `${window.location.origin}${window.location.pathname}?view=public&userId=${currentUser.uid}&bemId=${id}`;
-            new QRCode(document.getElementById("qrcode-view"), {
-                text: publicUrl,
-                width: 128,
-                height: 128,
-            });
-
+            new QRCode(document.getElementById("qrcode-view"), { text: publicUrl, width: 128, height: 128 });
             document.getElementById('close-view-modal').addEventListener('click', () => {
                 viewBemModal.classList.add('hidden');
             });
@@ -961,62 +880,75 @@
         async function generatePDF(id, bens) {
             const bem = bens.find(b => b.id === id);
             if (!bem) return;
-            
             showLoading(true);
-
             const isDarkMode = document.documentElement.classList.contains('dark');
-            if (isDarkMode) {
-                document.documentElement.classList.remove('dark');
-            }
-            
+            if (isDarkMode) document.documentElement.classList.remove('dark');
             const pdfContainer = document.createElement('div');
             pdfContainer.style.position = 'absolute';
             pdfContainer.style.left = '-9999px';
             pdfContainer.style.width = '800px';
-            
             pdfContainer.innerHTML = generateBemDetailHTML(bem, true, false, id);
             document.body.appendChild(pdfContainer);
-
             const publicUrl = `${window.location.origin}${window.location.pathname}?view=public&userId=${currentUser.uid}&bemId=${id}`;
-            new QRCode(pdfContainer.querySelector("#qrcode-view"), {
-                text: publicUrl,
-                width: 128,
-                height: 128,
-            });
-            
+            new QRCode(pdfContainer.querySelector("#qrcode-view"), { text: publicUrl, width: 128, height: 128 });
             await new Promise(resolve => setTimeout(resolve, 500));
-
             try {
                 const canvas = await html2canvas(pdfContainer, { scale: 2 });
                 const imgData = canvas.toDataURL('image/png');
-                const pdf = new jspdf.jsPDF({
-                    orientation: 'portrait',
-                    unit: 'px',
-                    format: [canvas.width, canvas.height]
-                });
+                const pdf = new jspdf.jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
                 pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
                 pdf.save(`FichaPatrimonial_${bem.codigoBem}.pdf`);
             } catch (error) {
-                console.error("Erro ao gerar PDF:", error);
                 showToast("Não foi possível gerar o PDF.");
             } finally {
                 document.body.removeChild(pdfContainer);
-                if (isDarkMode) {
-                    document.documentElement.classList.add('dark');
-                }
+                if (isDarkMode) document.documentElement.classList.add('dark');
                 showLoading(false);
             }
         }
         
         function generateBemDetailHTML(bem, isPdfMode = false, isPublic = false, bemId = '') {
-            const dataFormatada = bem.criadoEm.toDate ? bem.criadoEm.toDate().toLocaleDateString('pt-BR') : new Date(bem.criadoEm).toLocaleDateString('pt-BR');
+            const formatCurrency = (value) => (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            // --- CÁLCULOS DE DEPRECIAÇÃO ---
+            const valorAquisicao = bem.valor || 0;
+            const valorResidual = bem.valorResidual || 0;
+            const vidaUtil = bem.vidaUtil || 0;
+            const dataAquisicao = bem.criadoEm && bem.criadoEm.toDate ? bem.criadoEm.toDate() : new Date();
+            const anosPassados = new Date().getFullYear() - dataAquisicao.getFullYear();
+            
+            const depreciacaoAnual = vidaUtil > 0 ? (valorAquisicao - valorResidual) / vidaUtil : 0;
+            const depreciacaoAcumulada = Math.min(depreciacaoAnual * anosPassados, valorAquisicao - valorResidual);
+            const valorContabilAtual = valorAquisicao - depreciacaoAcumulada;
+            
+            let tabelaDepreciacaoHtml = `
+                <table class="w-full text-left text-sm mt-2">
+                    <thead class="bg-gray-100 dark:bg-gray-700">
+                        <tr>
+                            <th class="p-2 font-semibold">Ano</th>
+                            <th class="p-2 font-semibold text-right">Valor Contábil</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            for (let i = 0; i <= vidaUtil; i++) {
+                const valorAno = Math.max(valorAquisicao - (depreciacaoAnual * i), valorResidual);
+                tabelaDepreciacaoHtml += `
+                    <tr class="border-b border-gray-200 dark:border-gray-700/50">
+                        <td class="p-2">${i === 0 ? `Aquisição (${dataAquisicao.getFullYear()})` : `Ano ${i}`}</td>
+                        <td class="p-2 text-right">${formatCurrency(valorAno)}</td>
+                    </tr>
+                `;
+            }
+            tabelaDepreciacaoHtml += '</tbody></table>';
+            // --- FIM DOS CÁLCULOS ---
+
+            const dataFormatada = dataAquisicao.toLocaleDateString('pt-BR');
             const placeholderImg = "https://placehold.co/200x150/e2e8f0/adb5bd?text=Sem+Foto";
-            const logoPlaceholder = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="; // Imagem transparente
             const fotoSrc = bem.fotoUrl || placeholderImg;
-            const valorFormatado = (bem.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             return `
-                <div id="pdf-content" class="p-8 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+                <div id="pdf-content" class="p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
                     <div class="flex justify-between items-start border-b-2 pb-4 mb-4 border-gray-200 dark:border-gray-700">
                         <div>
                             <div class="flex items-center text-blue-600 dark:text-blue-500 mb-2">
@@ -1026,29 +958,32 @@
                         </div>
                         ${!isPdfMode && !isPublic ? '<button id="close-view-modal" class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-3xl">&times;</button>' : ''}
                     </div>
-                    <div class="grid grid-cols-12 gap-6">
-                        <div class="col-span-12 space-y-4 text-gray-800 dark:text-gray-300">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Código do Bem</p><p class="font-semibold text-lg">${bem.codigoBem}</p></div>
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Valor do Bem</p><p class="font-semibold text-lg">${valorFormatado}</p></div>
-                            </div>
-                            <div><p class="text-sm text-gray-500 dark:text-gray-400">Descrição</p><p class="font-semibold">${bem.descricao}</p></div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Órgão</p><p class="font-semibold">${bem.orgao}</p></div>
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Setor</p><p class="font-semibold">${bem.setor}</p></div>
-                            </div>
-                             <div class="grid grid-cols-2 gap-4">
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Vida Útil</p><p class="font-semibold">${bem.vidaUtil} anos</p></div>
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Período de Utilização</p><p class="font-semibold">${bem.periodoUtilizacao}</p></div>
-                            </div>
-                             <div class="grid grid-cols-2 gap-4">
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Estado de Conservação</p><p class="font-semibold">${bem.estadoConservacao}/10</p></div>
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Status</p><p class="font-semibold">${bem.ocioso ? 'Ocioso' : 'Em Uso'}</p></div>
-                            </div>
-                            <div><p class="text-sm text-gray-500 dark:text-gray-400">Observações</p><p class="font-semibold">${bem.observacoes || 'Nenhuma'}</p></div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-gray-800 dark:text-gray-300">
+                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Código do Bem</p><p class="font-semibold text-lg">${bem.codigoBem}</p></div>
+                        <div class="md:text-right"><p class="text-sm text-gray-500 dark:text-gray-400">Status</p><p class="font-semibold text-lg">${bem.ocioso ? 'Ocioso' : 'Em Uso'}</p></div>
+                        <div class="col-span-1 md:col-span-2"><p class="text-sm text-gray-500 dark:text-gray-400">Descrição</p><p class="font-semibold">${bem.descricao}</p></div>
+                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Órgão</p><p class="font-semibold">${bem.orgao}</p></div>
+                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Setor</p><p class="font-semibold">${bem.setor}</p></div>
+                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Estado de Conservação</p><p class="font-semibold">${bem.estadoConservacao}/10</p></div>
+                    </div>
+
+                    <div class="mt-6 border-t pt-4 border-gray-200 dark:border-gray-700">
+                        <h4 class="text-xl font-bold text-gray-800 dark:text-white mb-3">Análise de Depreciação</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"><p class="text-gray-500 dark:text-gray-400">Valor de Aquisição</p><p class="font-bold text-base">${formatCurrency(valorAquisicao)}</p></div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"><p class="text-gray-500 dark:text-gray-400">Valor Residual</p><p class="font-bold text-base">${formatCurrency(valorResidual)}</p></div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"><p class="text-gray-500 dark:text-gray-400">Vida Útil</p><p class="font-bold text-base">${vidaUtil} anos</p></div>
+                            <div class="bg-blue-50 dark:bg-blue-900/50 p-3 rounded-lg col-span-1 md:col-span-2"><p class="text-blue-600 dark:text-blue-300">Depreciação Anual</p><p class="font-bold text-base text-blue-800 dark:text-blue-200">${formatCurrency(depreciacaoAnual)}</p></div>
+                            <div class="bg-green-50 dark:bg-green-900/50 p-3 rounded-lg col-span-1 md:col-span-1"><p class="text-green-600 dark:text-green-300">Valor Contábil Atual</p><p class="font-bold text-lg text-green-800 dark:text-green-200">${formatCurrency(valorContabilAtual)}</p></div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="font-semibold mb-1 text-gray-800 dark:text-white">Projeção de Valor Contábil:</p>
+                            ${tabelaDepreciacaoHtml}
                         </div>
                     </div>
-                    <div class="mt-8 flex flex-col items-center justify-center space-y-2 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                    
+                    <div class="mt-8 flex flex-col items-center justify-center space-y-2 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                         <img src="${fotoSrc}" alt="Foto do bem" class="rounded-lg object-cover w-full max-w-xs h-auto mb-4" crossorigin="anonymous">
                         <div id="qrcode-view" class="flex items-center justify-center bg-white p-1 rounded-md"></div>
                         <p class="text-xs text-center text-gray-600 dark:text-gray-400 mt-2">Escaneie para ver detalhes</p>
@@ -1067,47 +1002,24 @@
         const nextPageBtn = document.getElementById('next-page');
         const pageInfo = document.getElementById('page-info');
 
-        searchInput.addEventListener('input', () => {
-            currentPage = 1;
-            applyFiltersAndRender();
-        });
-        setorFilter.addEventListener('change', () => {
-            currentPage = 1;
-            applyFiltersAndRender();
-        });
-        prevPageBtn.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                applyFiltersAndRender();
-            }
-        });
-        nextPageBtn.addEventListener('click', () => {
-            const totalPages = Math.ceil(filteredBens.length / itemsPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                applyFiltersAndRender();
-            }
-        });
+        searchInput.addEventListener('input', () => { currentPage = 1; applyFiltersAndRender(); });
+        setorFilter.addEventListener('change', () => { currentPage = 1; applyFiltersAndRender(); });
+        prevPageBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; applyFiltersAndRender(); } });
+        nextPageBtn.addEventListener('click', () => { const totalPages = Math.ceil(filteredBens.length / itemsPerPage); if (currentPage < totalPages) { currentPage++; applyFiltersAndRender(); } });
 
         function applyFiltersAndRender() {
             const searchTerm = searchInput.value.toLowerCase();
             const selectedSetor = setorFilter.value;
-
             filteredBens = currentBens.filter(bem => {
                 const searchMatch = bem.codigoBem.toLowerCase().includes(searchTerm) || bem.descricao.toLowerCase().includes(searchTerm);
                 const setorMatch = selectedSetor ? bem.setor === selectedSetor : true;
                 return searchMatch && setorMatch;
             });
-
             const totalPages = Math.ceil(filteredBens.length / itemsPerPage);
             pageInfo.textContent = `Página ${currentPage} de ${totalPages || 1}`;
             prevPageBtn.disabled = currentPage === 1;
             nextPageBtn.disabled = currentPage >= totalPages;
-
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const paginatedBens = filteredBens.slice(startIndex, endIndex);
-
+            const paginatedBens = filteredBens.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
             renderBensTable(paginatedBens);
             populateSetorFilter(currentBens);
         }
@@ -1118,11 +1030,8 @@
             setorFilter.innerHTML = '<option value="">Todos os Setores</option>';
             setores.forEach(setor => {
                 const option = document.createElement('option');
-                option.value = setor;
-                option.textContent = setor;
-                if (setor === currentSelected) {
-                    option.selected = true;
-                }
+                option.value = setor; option.textContent = setor;
+                if (setor === currentSelected) option.selected = true;
                 setorFilter.appendChild(option);
             });
         }
@@ -1131,35 +1040,16 @@
         document.getElementById('export-csv-button').addEventListener('click', async () => {
             showLoading(true);
             const bensCollection = getBensCollectionRef();
-            if(!bensCollection) {
-                showLoading(false);
-                return;
-            }
-            
+            if(!bensCollection) { showLoading(false); return; }
             const querySnapshot = await getDocs(bensCollection);
             const bens = querySnapshot.docs.map(doc => doc.data());
-
-            if (bens.length === 0) {
-                showToast("Nenhum bem para exportar.");
-                showLoading(false);
-                return;
-            }
-
+            if (bens.length === 0) { showToast("Nenhum bem para exportar."); showLoading(false); return; }
             logEvent(analytics, 'export_csv');
-
             const headers = Object.keys(bens[0]).join(',');
-            const rows = bens.map(bem => {
-                return Object.values(bem).map(value => {
-                    const strValue = String(value);
-                    if (strValue.includes(',')) return `"${strValue}"`;
-                    return strValue;
-                }).join(',');
-            });
-
+            const rows = bens.map(bem => Object.values(bem).map(value => `"${String(value)}"`).join(','));
             const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join('\n');
-            const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
+            link.setAttribute("href", encodeURI(csvContent));
             link.setAttribute("download", "patrimonio_export.csv");
             document.body.appendChild(link);
             link.click();
@@ -1175,9 +1065,7 @@
 
         function resetUI() {
             document.getElementById('bens-table-body').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500 dark:text-gray-400">Faça login para ver os bens.</td></tr>';
-            currentBens = [];
-            filteredBens = [];
-            currentPage = 1;
+            currentBens = []; filteredBens = []; currentPage = 1;
             applyFiltersAndRender();
             updateDashboard([]);
             if (bensPorSetorChartInstance) bensPorSetorChartInstance.destroy();
@@ -1190,15 +1078,8 @@
                 document.getElementById('confirm-modal-title').textContent = title;
                 document.getElementById('confirm-modal-body').textContent = body;
                 confirmModal.classList.remove('hidden');
-
-                document.getElementById('confirm-modal-cancel').onclick = () => {
-                    confirmModal.classList.add('hidden');
-                    resolve(false);
-                };
-                document.getElementById('confirm-modal-ok').onclick = () => {
-                    confirmModal.classList.add('hidden');
-                    resolve(true);
-                };
+                document.getElementById('confirm-modal-cancel').onclick = () => { confirmModal.classList.add('hidden'); resolve(false); };
+                document.getElementById('confirm-modal-ok').onclick = () => { confirmModal.classList.add('hidden'); resolve(true); };
             });
         }
 
@@ -1208,21 +1089,14 @@
         function showToast(message, type = 'error') {
             toastMessage.textContent = message;
             toast.classList.remove('bg-red-600', 'bg-green-600');
-            if (type === 'success') {
-                toast.classList.add('bg-green-600');
-            } else {
-                toast.classList.add('bg-red-600');
-            }
-            
+            toast.classList.add(type === 'success' ? 'bg-green-600' : 'bg-red-600');
             toast.classList.remove('hidden', 'opacity-0', '-translate-y-10');
-            
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => {
                 toast.classList.add('opacity-0', '-translate-y-10');
                 setTimeout(() => toast.classList.add('hidden'), 500);
             }, 3000);
         }
-
     </script>
 </body>
 </html>
