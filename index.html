@@ -205,7 +205,7 @@
                                 <p id="valor-total" class="text-2xl font-bold text-gray-900 dark:text-white">R$ 0,00</p>
                             </div>
                         </div>
-                         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex items-center space-x-4">
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex items-center space-x-4">
                             <div class="bg-red-100 dark:bg-red-900/50 p-3 rounded-full"><i class="fas fa-exclamation-triangle text-2xl text-red-600 dark:text-red-400"></i></div>
                             <div>
                                 <p class="text-gray-500 dark:text-gray-400 text-sm">Valor em Risco</p>
@@ -344,12 +344,13 @@
                         <input type="number" id="bem-valor-residual" step="0.01" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
-                <div>
+                 <div>
                     <label for="bem-descricao" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descrição do Bem</label>
                     <textarea id="bem-descricao" rows="3" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                     <div>
                         <label for="bem-vida-util" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Vida Útil (anos)</label>
                         <input type="number" id="bem-vida-util" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
@@ -358,6 +359,26 @@
                         <input type="text" id="bem-periodo-utilizacao" placeholder="Ex: 2 anos, 6 meses" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
+
+                <div>
+                    <label for="bem-metodo-depreciacao" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Método de Depreciação</label>
+                    <select id="bem-metodo-depreciacao" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="linear" selected>Linear</option>
+                        <option value="soma_digitos">Soma dos Dígitos</option>
+                        <option value="acelerada">Acelerada por Turnos</option>
+                    </select>
+                </div>
+                
+                <div id="container-fator-aceleracao" class="hidden">
+                    <label for="bem-fator-aceleracao" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Turnos de Operação</label>
+                     <select id="bem-fator-aceleracao" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="1.0" selected>1 Turno (8 horas)</option>
+                        <option value="1.5">2 Turnos (16 horas)</option>
+                        <option value="2.0">3 Turnos (24 horas)</option>
+                    </select>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Fator multiplicador da taxa de depreciação (1.0x, 1.5x ou 2.0x).</p>
+                </div>
+
                 <div>
                     <label for="bem-estado-conservacao" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado de Conservação (1 a 10)</label>
                     <input type="range" id="bem-estado-conservacao" min="1" max="10" value="5" class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer">
@@ -690,6 +711,17 @@
         const fotoInput = document.getElementById('bem-foto');
         const photoPreview = document.getElementById('photo-preview');
 
+        const metodoDepreciacaoSelect = document.getElementById('bem-metodo-depreciacao');
+        const fatorAceleracaoContainer = document.getElementById('container-fator-aceleracao');
+
+        metodoDepreciacaoSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'acelerada') {
+                fatorAceleracaoContainer.classList.remove('hidden');
+            } else {
+                fatorAceleracaoContainer.classList.add('hidden');
+            }
+        });
+
         fotoInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -700,6 +732,7 @@
 
         document.getElementById('show-add-bem-modal').addEventListener('click', () => {
             addBemForm.reset();
+            fatorAceleracaoContainer.classList.add('hidden');
             addBemError.textContent = '';
             photoPreview.classList.add('hidden');
             photoPreview.src = '';
@@ -732,11 +765,15 @@
                     setor: document.getElementById('bem-setor').value,
                     codigoBem: document.getElementById('bem-codigo').value,
                     valor: Number(document.getElementById('bem-valor').value) || 0,
-                    valorResidual: Number(document.getElementById('bem-valor-residual').value) || 0, // SALVA O NOVO CAMPO
+                    valorResidual: Number(document.getElementById('bem-valor-residual').value) || 0,
                     codigoAnterior: document.getElementById('bem-codigo-anterior').value,
                     descricao: document.getElementById('bem-descricao').value,
                     vidaUtil: Number(document.getElementById('bem-vida-util').value) || 0,
                     periodoUtilizacao: document.getElementById('bem-periodo-utilizacao').value,
+                    
+                    metodoDepreciacao: document.getElementById('bem-metodo-depreciacao').value,
+                    fatorAceleracao: Number(document.getElementById('bem-fator-aceleracao').value) || 1.0,
+
                     estadoConservacao: Number(document.getElementById('bem-estado-conservacao').value) || 0,
                     ocioso: document.getElementById('bem-ocioso').checked,
                     observacoes: document.getElementById('bem-observacoes').value,
@@ -878,97 +915,169 @@
         }
         
         async function generatePDF(id, bens) {
-    const bem = bens.find(b => b.id === id);
-    if (!bem) return;
+            const bem = bens.find(b => b.id === id);
+            if (!bem) return;
 
-    showLoading(true);
-    const isDarkMode = document.documentElement.classList.contains('dark');
-    // Temporariamente muda para o modo claro para consistência no PDF
-    if (isDarkMode) document.documentElement.classList.remove('dark');
+            showLoading(true);
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            if (isDarkMode) document.documentElement.classList.remove('dark');
 
-    // Cria um container fora da tela para renderizar o conteúdo do PDF
-    const pdfContainer = document.createElement('div');
-    pdfContainer.style.position = 'absolute';
-    pdfContainer.style.left = '-9999px'; // Posiciona fora da tela
-    pdfContainer.style.width = '800px'; // Define uma largura fixa para a renderização
-    pdfContainer.innerHTML = generateBemDetailHTML(bem, true, false, id);
-    document.body.appendChild(pdfContainer);
-    
-    // Gera o QR Code dentro do container do PDF
-    const publicUrl = `${window.location.origin}${window.location.pathname}?view=public&userId=${currentUser.uid}&bemId=${id}`;
-    new QRCode(pdfContainer.querySelector("#qrcode-view"), { text: publicUrl, width: 128, height: 128 });
+            const pdfContainer = document.createElement('div');
+            pdfContainer.style.position = 'absolute';
+            pdfContainer.style.left = '-9999px';
+            pdfContainer.style.width = '800px';
+            pdfContainer.innerHTML = generateBemDetailHTML(bem, true, false, id);
+            document.body.appendChild(pdfContainer);
+            
+            const publicUrl = `${window.location.origin}${window.location.pathname}?view=public&userId=${currentUser.uid}&bemId=${id}`;
+            new QRCode(pdfContainer.querySelector("#qrcode-view"), { text: publicUrl, width: 128, height: 128 });
 
-    // Espera a imagem carregar completamente antes de gerar o canvas
-    const image = pdfContainer.querySelector('img');
-    await new Promise((resolve, reject) => {
-        // Se a imagem já estiver em cache e carregada, resolve imediatamente
-        if (image.complete) {
-            resolve();
-        } else {
-            image.onload = resolve;
-            image.onerror = reject;
+            const image = pdfContainer.querySelector('img');
+            await new Promise((resolve, reject) => {
+                if (image.complete) {
+                    resolve();
+                } else {
+                    image.onload = resolve;
+                    image.onerror = reject;
+                }
+            });
+
+            try {
+                const canvas = await html2canvas(pdfContainer, { 
+                    scale: 2,
+                    useCORS: true
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jspdf.jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
+                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+                pdf.save(`FichaPatrimonial_${bem.codigoBem}.pdf`);
+
+            } catch (error) {
+                console.error("Erro ao gerar PDF:", error);
+                showToast("Não foi possível gerar o PDF.");
+            } finally {
+                document.body.removeChild(pdfContainer);
+                if (isDarkMode) document.documentElement.classList.add('dark');
+                showLoading(false);
+            }
         }
-    });
-
-    try {
-        // A mudança principal está aqui: a opção useCORS
-        const canvas = await html2canvas(pdfContainer, { 
-            scale: 2,
-            useCORS: true // Adiciona a opção para carregar imagens de outros domínios
-        });
         
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jspdf.jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save(`FichaPatrimonial_${bem.codigoBem}.pdf`);
-
-    } catch (error) {
-        console.error("Erro ao gerar PDF:", error);
-        showToast("Não foi possível gerar o PDF.");
-    } finally {
-        document.body.removeChild(pdfContainer); // Limpa o container do DOM
-        if (isDarkMode) document.documentElement.classList.add('dark'); // Restaura o tema escuro se necessário
-        showLoading(false);
-    }
-}
-        
-        function generateBemDetailHTML(bem, isPdfMode = false, isPublic = false, bemId = '') {
-            const formatCurrency = (value) => (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-            // --- CÁLCULOS DE DEPRECIAÇÃO ---
+        function calcularProjecaoDepreciacao(bem) {
             const valorAquisicao = bem.valor || 0;
             const valorResidual = bem.valorResidual || 0;
             const vidaUtil = bem.vidaUtil || 0;
+            const valorDepreciavel = valorAquisicao - valorResidual;
+
+            if (vidaUtil <= 0 || valorDepreciavel < 0) {
+                const projecaoZerada = Array.from({ length: vidaUtil + 1 }, (_, i) => ({
+                    ano: i,
+                    valorContabil: valorAquisicao,
+                    depreciacaoAno: 0,
+                }));
+                return { projecao: projecaoZerada, depreciacaoAnoCorrente: 0, valorContabilAtual: valorAquisicao };
+            }
+
+            let projecao = [];
+            
+            switch (bem.metodoDepreciacao) {
+                case 'soma_digitos':
+                    const somaDosDigitos = (vidaUtil * (vidaUtil + 1)) / 2;
+                    let acumuladaSoma = 0;
+                    for (let i = 1; i <= vidaUtil; i++) {
+                        const fracao = (vidaUtil - i + 1) / somaDosDigitos;
+                        const depreciacaoAno = fracao * valorDepreciavel;
+                        acumuladaSoma += depreciacaoAno;
+                        projecao.push({ ano: i, depreciacaoAno: depreciacaoAno, valorContabil: valorAquisicao - acumuladaSoma });
+                    }
+                    break;
+
+                case 'acelerada':
+                    const fator = bem.fatorAceleracao || 1.0;
+                    const taxaLinearAnual = 1 / vidaUtil;
+                    const taxaAcelerada = taxaLinearAnual * fator;
+                    let acumuladaAcelerada = 0;
+                    for (let i = 1; i <= vidaUtil; i++) {
+                        let depreciacaoAno = taxaAcelerada * valorDepreciavel;
+                        if ((acumuladaAcelerada + depreciacaoAno) > valorDepreciavel) {
+                            depreciacaoAno = valorDepreciavel - acumuladaAcelerada;
+                        }
+                        acumuladaAcelerada += depreciacaoAno;
+                        projecao.push({ ano: i, depreciacaoAno: depreciacaoAno, valorContabil: valorAquisicao - acumuladaAcelerada });
+                        if (acumuladaAcelerada >= valorDepreciavel) break;
+                    }
+                    break;
+                    
+                case 'linear':
+                default:
+                    const depreciacaoAnualLinear = valorDepreciavel / vidaUtil;
+                    let acumuladaLinear = 0;
+                    for (let i = 1; i <= vidaUtil; i++) {
+                        acumuladaLinear += depreciacaoAnualLinear;
+                        projecao.push({ ano: i, depreciacaoAno: depreciacaoAnualLinear, valorContabil: valorAquisicao - acumuladaLinear });
+                    }
+                    break;
+            }
+
+            while (projecao.length < vidaUtil) {
+                projecao.push({ ano: projecao.length + 1, depreciacaoAno: 0, valorContabil: valorResidual });
+            }
+
+            projecao.unshift({ ano: 0, depreciacaoAno: 0, valorContabil: valorAquisicao });
+
             const dataAquisicao = bem.criadoEm && bem.criadoEm.toDate ? bem.criadoEm.toDate() : new Date();
-            const anosPassados = new Date().getFullYear() - dataAquisicao.getFullYear();
+            const anoAquisicao = dataAquisicao.getFullYear();
+            const anoCorrente = new Date().getFullYear();
+            const anosPassados = anoCorrente - anoAquisicao;
+
+            let valorContabilAtual = valorAquisicao;
+            let depreciacaoAnoCorrente = 0;
+
+            if (anosPassados > 0 && anosPassados <= vidaUtil) {
+                valorContabilAtual = projecao[anosPassados].valorContabil;
+                depreciacaoAnoCorrente = projecao[anosPassados].depreciacaoAno;
+            } else if (anosPassados > vidaUtil) {
+                valorContabilAtual = valorResidual;
+            }
+
+            return { projecao, depreciacaoAnoCorrente, valorContabilAtual };
+        }
+        
+        function generateBemDetailHTML(bem, isPdfMode = false, isPublic = false, bemId = '') {
+            const formatCurrency = (value) => (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const dataAquisicao = bem.criadoEm && bem.criadoEm.toDate ? bem.criadoEm.toDate() : new Date();
             
-            const depreciacaoAnual = vidaUtil > 0 ? (valorAquisicao - valorResidual) / vidaUtil : 0;
-            const depreciacaoAcumulada = Math.min(depreciacaoAnual * anosPassados, valorAquisicao - valorResidual);
-            const valorContabilAtual = valorAquisicao - depreciacaoAcumulada;
-            
+            const { projecao, depreciacaoAnoCorrente, valorContabilAtual } = calcularProjecaoDepreciacao(bem);
+
+            const nomesMetodos = {
+                linear: 'Linear',
+                soma_digitos: 'Soma dos Dígitos',
+                acelerada: `Acelerada (${bem.fatorAceleracao}x)`
+            };
+            const nomeMetodoAtual = nomesMetodos[bem.metodoDepreciacao] || 'Linear';
+
             let tabelaDepreciacaoHtml = `
                 <table class="w-full text-left text-sm mt-2">
                     <thead class="bg-gray-100 dark:bg-gray-700">
                         <tr>
                             <th class="p-2 font-semibold">Ano</th>
+                            <th class="p-2 font-semibold text-right">Depreciação no Ano</th>
                             <th class="p-2 font-semibold text-right">Valor Contábil</th>
                         </tr>
                     </thead>
                     <tbody>
             `;
-            for (let i = 0; i <= vidaUtil; i++) {
-                const valorAno = Math.max(valorAquisicao - (depreciacaoAnual * i), valorResidual);
+            projecao.forEach(item => {
                 tabelaDepreciacaoHtml += `
                     <tr class="border-b border-gray-200 dark:border-gray-700/50">
-                        <td class="p-2">${i === 0 ? `Aquisição (${dataAquisicao.getFullYear()})` : `Ano ${i}`}</td>
-                        <td class="p-2 text-right">${formatCurrency(valorAno)}</td>
+                        <td class="p-2">${item.ano === 0 ? `Aquisição (${dataAquisicao.getFullYear()})` : `Ano ${item.ano}`}</td>
+                        <td class="p-2 text-right">${formatCurrency(item.depreciacaoAno)}</td>
+                        <td class="p-2 text-right font-medium">${formatCurrency(item.valorContabil)}</td>
                     </tr>
                 `;
-            }
+            });
             tabelaDepreciacaoHtml += '</tbody></table>';
-            // --- FIM DOS CÁLCULOS ---
 
-            const dataFormatada = dataAquisicao.toLocaleDateString('pt-BR');
             const placeholderImg = "https://placehold.co/200x150/e2e8f0/adb5bd?text=Sem+Foto";
             const fotoSrc = bem.fotoUrl || placeholderImg;
 
@@ -994,12 +1103,15 @@
                     </div>
 
                     <div class="mt-6 border-t pt-4 border-gray-200 dark:border-gray-700">
-                        <h4 class="text-xl font-bold text-gray-800 dark:text-white mb-3">Análise de Depreciação</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"><p class="text-gray-500 dark:text-gray-400">Valor de Aquisição</p><p class="font-bold text-base">${formatCurrency(valorAquisicao)}</p></div>
-                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"><p class="text-gray-500 dark:text-gray-400">Valor Residual</p><p class="font-bold text-base">${formatCurrency(valorResidual)}</p></div>
-                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"><p class="text-gray-500 dark:text-gray-400">Vida Útil</p><p class="font-bold text-base">${vidaUtil} anos</p></div>
-                            <div class="bg-blue-50 dark:bg-blue-900/50 p-3 rounded-lg col-span-1 md:col-span-2"><p class="text-blue-600 dark:text-blue-300">Depreciação Anual</p><p class="font-bold text-base text-blue-800 dark:text-blue-200">${formatCurrency(depreciacaoAnual)}</p></div>
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xl font-bold text-gray-800 dark:text-white mb-3">Análise de Depreciação</h4>
+                            <span class="text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2 py-1 rounded-full">${nomeMetodoAtual}</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mt-3">
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"><p class="text-gray-500 dark:text-gray-400">Valor de Aquisição</p><p class="font-bold text-base">${formatCurrency(bem.valor)}</p></div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"><p class="text-gray-500 dark:text-gray-400">Valor Residual</p><p class="font-bold text-base">${formatCurrency(bem.valorResidual)}</p></div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"><p class="text-gray-500 dark:text-gray-400">Vida Útil</p><p class="font-bold text-base">${bem.vidaUtil} anos</p></div>
+                            <div class="bg-blue-50 dark:bg-blue-900/50 p-3 rounded-lg col-span-1 md:col-span-2"><p class="text-blue-600 dark:text-blue-300">Depreciação do Ano (${new Date().getFullYear()})</p><p class="font-bold text-base text-blue-800 dark:text-blue-200">${formatCurrency(depreciacaoAnoCorrente)}</p></div>
                             <div class="bg-green-50 dark:bg-green-900/50 p-3 rounded-lg col-span-1 md:col-span-1"><p class="text-green-600 dark:text-green-300">Valor Contábil Atual</p><p class="font-bold text-lg text-green-800 dark:text-green-200">${formatCurrency(valorContabilAtual)}</p></div>
                         </div>
                         <div class="mt-4">
@@ -1014,7 +1126,7 @@
                         <p class="text-xs text-center text-gray-600 dark:text-gray-400 mt-2">Escaneie para ver detalhes</p>
                     </div>
                     <div class="border-t-2 pt-4 mt-6 text-sm text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700">
-                        <p>Ficha gerada em ${new Date().toLocaleString('pt-BR')}. Cadastrado em ${dataFormatada}.</p>
+                        <p>Ficha gerada em ${new Date().toLocaleString('pt-BR')}. Cadastrado em ${dataAquisicao.toLocaleDateString('pt-BR')}.</p>
                     </div>
                 </div>
             `;
