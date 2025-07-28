@@ -878,34 +878,59 @@
         }
         
         async function generatePDF(id, bens) {
-            const bem = bens.find(b => b.id === id);
-            if (!bem) return;
-            showLoading(true);
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            if (isDarkMode) document.documentElement.classList.remove('dark');
-            const pdfContainer = document.createElement('div');
-            pdfContainer.style.position = 'absolute';
-            pdfContainer.style.left = '-9999px';
-            pdfContainer.style.width = '800px';
-            pdfContainer.innerHTML = generateBemDetailHTML(bem, true, false, id);
-            document.body.appendChild(pdfContainer);
-            const publicUrl = `${window.location.origin}${window.location.pathname}?view=public&userId=${currentUser.uid}&bemId=${id}`;
-            new QRCode(pdfContainer.querySelector("#qrcode-view"), { text: publicUrl, width: 128, height: 128 });
-            await new Promise(resolve => setTimeout(resolve, 500));
-            try {
-                const canvas = await html2canvas(pdfContainer, { scale: 2 });
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jspdf.jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
-                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-                pdf.save(`FichaPatrimonial_${bem.codigoBem}.pdf`);
-            } catch (error) {
-                showToast("Não foi possível gerar o PDF.");
-            } finally {
-                document.body.removeChild(pdfContainer);
-                if (isDarkMode) document.documentElement.classList.add('dark');
-                showLoading(false);
-            }
+    const bem = bens.find(b => b.id === id);
+    if (!bem) return;
+
+    showLoading(true);
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    // Temporariamente muda para o modo claro para consistência no PDF
+    if (isDarkMode) document.documentElement.classList.remove('dark');
+
+    // Cria um container fora da tela para renderizar o conteúdo do PDF
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.position = 'absolute';
+    pdfContainer.style.left = '-9999px'; // Posiciona fora da tela
+    pdfContainer.style.width = '800px'; // Define uma largura fixa para a renderização
+    pdfContainer.innerHTML = generateBemDetailHTML(bem, true, false, id);
+    document.body.appendChild(pdfContainer);
+    
+    // Gera o QR Code dentro do container do PDF
+    const publicUrl = `${window.location.origin}${window.location.pathname}?view=public&userId=${currentUser.uid}&bemId=${id}`;
+    new QRCode(pdfContainer.querySelector("#qrcode-view"), { text: publicUrl, width: 128, height: 128 });
+
+    // Espera a imagem carregar completamente antes de gerar o canvas
+    const image = pdfContainer.querySelector('img');
+    await new Promise((resolve, reject) => {
+        // Se a imagem já estiver em cache e carregada, resolve imediatamente
+        if (image.complete) {
+            resolve();
+        } else {
+            image.onload = resolve;
+            image.onerror = reject;
         }
+    });
+
+    try {
+        // A mudança principal está aqui: a opção useCORS
+        const canvas = await html2canvas(pdfContainer, { 
+            scale: 2,
+            useCORS: true // Adiciona a opção para carregar imagens de outros domínios
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jspdf.jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save(`FichaPatrimonial_${bem.codigoBem}.pdf`);
+
+    } catch (error) {
+        console.error("Erro ao gerar PDF:", error);
+        showToast("Não foi possível gerar o PDF.");
+    } finally {
+        document.body.removeChild(pdfContainer); // Limpa o container do DOM
+        if (isDarkMode) document.documentElement.classList.add('dark'); // Restaura o tema escuro se necessário
+        showLoading(false);
+    }
+}
         
         function generateBemDetailHTML(bem, isPdfMode = false, isPublic = false, bemId = '') {
             const formatCurrency = (value) => (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
