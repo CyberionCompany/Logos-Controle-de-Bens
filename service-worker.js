@@ -1,5 +1,5 @@
 // Define um nome e uma versão para o cache
-const CACHE_NAME = 'verbo-cache-v1';
+const CACHE_NAME = 'logostrack-cache-v1';
 
 // Lista de ficheiros essenciais para o app funcionar offline
 const urlsToCache = [
