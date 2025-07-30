@@ -4,8 +4,8 @@
   "description": "logosTrack é um sistema web para contadores e empresas gerenciarem bens patrimoniais com cálculo automático de depreciação e geração de relatórios contábeis.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#d472e0",
-  "theme_color": "#242030",
+  "background_color": "#FFFFFF",
+  "theme_color": "#2563EB",
   "icons": [
     {
       "src": "/src/utilites/icon(192 x 192 px).png",
